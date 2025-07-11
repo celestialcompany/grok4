@@ -67,6 +67,7 @@ export default function MainPage() {
               {t("startChatting")} <ArrowRight className="ml-3 h-6 w-6" />
             </Button>
           </Link>
+          <p className="text-sm text-gray-500 mt-4 animate-fade-in [animation-delay:1.2s]">{t("freeChatDisclaimer")}</p>
         </div>
       </section>
 
@@ -209,6 +210,7 @@ export default function MainPage() {
               {t("startChatting")} <ArrowRight className="ml-3 h-6 w-6" />
             </Button>
           </Link>
+          <p className="text-sm text-gray-500 mt-4 animate-fade-in [animation-delay:1s]">{t("freeChatDisclaimer")}</p>
         </div>
       </section>
 

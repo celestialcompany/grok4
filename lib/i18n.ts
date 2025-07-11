@@ -169,6 +169,7 @@ export const translations = {
     privacySection5Content:
       "Вы имеете право на доступ, исправление или удаление вашей личной информации. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо вопросы о вашей конфиденциальности.",
     privacyConclusion: "Используя наш сервис, вы соглашаетесь с этой Политикой конфиденциальности.",
+    freeChatDisclaimer: "Общение с Grok 4 абсолютно бесплатно!",
   },
   en: {
     // Auth
@@ -338,6 +339,7 @@ export const translations = {
     privacySection5Content:
       "You have the right to access, correct, or delete your personal information. Please contact us if you have any questions about your privacy.",
     privacyConclusion: "By using our service, you agree to this Privacy Policy.",
+    freeChatDisclaimer: "Chatting with Grok 4 is completely free!",
   },
 } as const
 
