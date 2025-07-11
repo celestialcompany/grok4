@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useChat } from "ai/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,23 +27,22 @@ import {
   Paperclip,
   ChevronDown,
   MoreHorizontal,
+  Upload,
+  File,
+  ImageIcon,
+  X,
   LogOut,
   Settings,
   Key,
   Zap,
   Sparkles,
-  X,
-  Plus,
 } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { auth } from "@/lib/firebase"
 import { signOut, type User } from "firebase/auth"
 import { useLanguage } from "@/contexts/language-context"
 import LanguageSwitcher from "@/components/language-switcher"
-import FileUploadZone from "@/components/file-upload-zone"
-import FilePreviewCard from "@/components/file-preview-card"
-import type { MultimodalFile } from "@/lib/multimodal-utils"
 
 interface GrokChatProps {
   user: User
@@ -54,30 +51,24 @@ interface GrokChatProps {
 export default function GrokChat({ user }: GrokChatProps) {
   const { t } = useLanguage()
   const { language } = useLanguage()
-  const [uploadedFiles, setUploadedFiles] = useState<MultimodalFile[]>([])
-  const [showUploadZone, setShowUploadZone] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
-
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop } = useChat({
     body: {
       language: language,
-      files: uploadedFiles,
     },
     onResponse: () => {
       setIsGenerating(true)
     },
     onFinish: () => {
       setIsGenerating(false)
-      // Очищаем файлы после отправки
-      setUploadedFiles([])
-      setShowUploadZone(false)
     },
     onError: () => {
       setIsGenerating(false)
     },
   })
-
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string; url: string; type: string }>>([])
+  const [isUploading, setIsUploading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -103,15 +94,45 @@ export default function GrokChat({ user }: GrokChatProps) {
     }
   }
 
-  const handleFilesUploaded = (newFiles: MultimodalFile[]) => {
+  const handleFileUpload = async (files: FileList) => {
+    if (!files.length) return
+
+    setIsUploading(true)
+    const newFiles = []
+
+    for (const file of Array.from(files)) {
+      try {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (response.ok) {
+          const { url } = await response.json()
+          newFiles.push({
+            id: Math.random().toString(36),
+            name: file.name,
+            url,
+            type: file.type,
+          })
+        }
+      } catch (error) {
+        toast.error(t("uploadError", { fileName: file.name }))
+      }
+    }
+
     setUploadedFiles((prev) => [...prev, ...newFiles])
+    setIsUploading(false)
+
+    if (newFiles.length > 0) {
+      toast.success(t("filesUploaded", { count: newFiles.length }))
+    }
   }
 
   const removeFile = (fileId: string) => {
-    const fileToRemove = uploadedFiles.find((f) => f.id === fileId)
-    if (fileToRemove?.preview) {
-      URL.revokeObjectURL(fileToRemove.preview)
-    }
     setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId))
   }
 
@@ -126,16 +147,6 @@ export default function GrokChat({ user }: GrokChatProps) {
 
   const displayName = user.displayName || user.email?.split("@")[0] || "Пользователь"
 
-  // Обработка отправки формы с файлами
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Если есть текст или файлы, отправляем
-    if (input.trim() || uploadedFiles.length > 0) {
-      handleSubmit(e)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-[#212121] text-white flex flex-col">
       {/* Header */}
@@ -148,7 +159,7 @@ export default function GrokChat({ user }: GrokChatProps) {
             </div>
             <h1 className="text-lg font-medium">{t("grok")} 4</h1>
             <span className="text-xs bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full">
-              Vision
+              0709
             </span>
           </div>
           <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -214,7 +225,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                   </div>
                   <div>
                     <h2 className="text-4xl font-bold text-white">Grok 4</h2>
-                    <p className="text-sm text-blue-400">Vision Model • Multimodal AI</p>
+                    <p className="text-sm text-blue-400">Latest Model • July 2024</p>
                   </div>
                 </div>
                 <h3 className="text-xl font-medium text-gray-300">
@@ -222,15 +233,17 @@ export default function GrokChat({ user }: GrokChatProps) {
                 </h3>
                 <p className="text-gray-400">{t("howCanIHelp")}</p>
                 <div className="flex flex-wrap gap-2 justify-center mt-6">
-                  <span className="text-xs bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full">🖼️ Image analysis</span>
-                  <span className="text-xs bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full">
-                    🎥 Video understanding
+                  <span className="text-xs bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full">
+                    🌐 Real-time knowledge
                   </span>
                   <span className="text-xs bg-green-600/20 text-green-300 px-3 py-1 rounded-full">
-                    🎵 Audio processing
+                    🧠 Advanced reasoning
                   </span>
-                  <span className="text-xs bg-orange-600/20 text-orange-300 px-3 py-1 rounded-full">
-                    📄 Document analysis
+                  <span className="text-xs bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full">
+                    💭 Thinking mode
+                  </span>
+                  <span className="text-xs bg-yellow-600/20 text-yellow-300 px-3 py-1 rounded-full">
+                    ⚡ Enhanced performance
                   </span>
                 </div>
               </div>
@@ -443,56 +456,59 @@ export default function GrokChat({ user }: GrokChatProps) {
           )}
         </ScrollArea>
 
-        {/* File Upload Zone */}
-        {showUploadZone && (
-          <div className="px-4 py-3 border-t border-gray-700">
-            <FileUploadZone onFilesUploaded={handleFilesUploaded} maxFiles={5} disabled={isLoading || isGenerating} />
-          </div>
-        )}
-
-        {/* Uploaded Files Preview */}
         {uploadedFiles.length > 0 && (
-          <div className="px-4 py-3 border-t border-gray-700">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-sm text-gray-400">Прикрепленные файлы ({uploadedFiles.length})</div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setUploadedFiles([])}
-                className="text-gray-400 hover:text-red-400"
-              >
-                Очистить все
-              </Button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
-              {uploadedFiles.map((file) => (
-                <FilePreviewCard key={file.id} file={file} onRemove={removeFile} />
-              ))}
-            </div>
+          <div className="mb-4 flex flex-wrap gap-2 px-4">
+            {uploadedFiles.map((file) => (
+              <div key={file.id} className="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2 text-sm">
+                {file.type.startsWith("image/") ? (
+                  <ImageIcon className="h-4 w-4 text-blue-400" />
+                ) : (
+                  <File className="h-4 w-4 text-green-400" />
+                )}
+                <span className="text-gray-200 truncate max-w-32">{file.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 text-gray-400 hover:text-red-400"
+                  onClick={() => removeFile(file.id)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
           </div>
         )}
 
         {/* Input Area */}
         <div className="p-4 border-t border-gray-700">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleFormSubmit} className="relative">
+            <form onSubmit={handleSubmit} className="relative">
               <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,.pdf,.txt,.doc,.docx"
+                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                  className="hidden"
+                  id="file-upload"
+                />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   className="absolute left-3 h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-600"
-                  onClick={() => setShowUploadZone(!showUploadZone)}
-                  disabled={isLoading || isGenerating}
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                  disabled={isUploading}
                 >
-                  {showUploadZone ? <X className="h-4 w-4" /> : <Paperclip className="h-4 w-4" />}
+                  {isUploading ? <Upload className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
                 </Button>
 
                 <Input
                   value={input}
                   onChange={handleInputChange}
-                  placeholder={uploadedFiles.length > 0 ? "Опишите что нужно сделать с файлами..." : t("askSomething")}
-                  disabled={isLoading || isGenerating}
+                  placeholder={t("askSomething")}
+                  disabled={isLoading}
                   className="flex-1 bg-transparent border-0 pl-12 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
 
@@ -519,7 +535,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                   ) : (
                     <Button
                       type="submit"
-                      disabled={!input.trim() && uploadedFiles.length === 0}
+                      disabled={!input.trim()}
                       size="sm"
                       className="h-8 w-8 p-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:bg-gray-600 disabled:text-gray-400"
                     >
@@ -530,24 +546,7 @@ export default function GrokChat({ user }: GrokChatProps) {
               </div>
             </form>
 
-            <div className="flex items-center justify-between mt-3">
-              <div className="flex items-center gap-2">
-                {uploadedFiles.length > 0 && (
-                  <div className="flex gap-1">
-                    {uploadedFiles.slice(0, 3).map((file) => (
-                      <FilePreviewCard key={file.id} file={file} onRemove={removeFile} compact />
-                    ))}
-                    {uploadedFiles.length > 3 && (
-                      <div className="flex items-center gap-1 bg-gray-700 rounded-lg px-2 py-1 text-xs text-gray-300">
-                        <Plus className="h-3 w-3" />
-                        {uploadedFiles.length - 3}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4 Vision</p>
-            </div>
+            <p className="text-xs text-gray-400 text-center mt-3">{t("disclaimer")} • Powered by Grok 4 (July 2024)</p>
           </div>
         </div>
       </div>
