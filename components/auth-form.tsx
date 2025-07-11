@@ -11,14 +11,15 @@ import { auth } from "@/lib/firebase"
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signInWithPopup,
   GoogleAuthProvider,
   updateProfile,
   sendPasswordResetEmail,
+  signInWithPopup,
 } from "firebase/auth"
 import { toast } from "sonner"
 import { Eye, EyeOff, Mail, Lock, User, Bot } from "lucide-react"
 import { useLanguage } from "@/contexts/language-context"
+import LanguageSwitcher from "@/components/language-switcher" // Import LanguageSwitcher
 
 export default function AuthForm() {
   const { t } = useLanguage()
@@ -146,6 +147,11 @@ export default function AuthForm() {
   return (
     <div className="min-h-screen bg-[#212121] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        <div className="flex justify-end mb-4">
+          {" "}
+          {/* Added container for LanguageSwitcher */}
+          <LanguageSwitcher />
+        </div>
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Bot className="h-8 w-8 text-green-500" />

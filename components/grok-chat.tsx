@@ -67,7 +67,6 @@ export default function GrokChat({ user }: GrokChatProps) {
       language: language,
     },
     onFinish: () => {
-      // Останавливаем голосовой ввод после получения ответа
       if (isListening && recognitionRef.current) {
         recognitionRef.current.stop()
         setIsListening(false)
@@ -89,12 +88,11 @@ export default function GrokChat({ user }: GrokChatProps) {
     }
   }, [messages])
 
-  // Инициализация SpeechRecognition
   useEffect(() => {
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition()
-      recognition.continuous = false // Останавливать после каждого результата
-      recognition.interimResults = true // Промежуточные результаты
+      recognition.continuous = false
+      recognition.interimResults = true
 
       recognition.onstart = () => {
         setIsListening(true)
@@ -112,17 +110,11 @@ export default function GrokChat({ user }: GrokChatProps) {
             interimTranscript += event.results[i][0].transcript
           }
         }
-
-        // Обновляем поле ввода с финальным или промежуточным текстом
         setInput(input + finalTranscript + interimTranscript)
       }
 
       recognition.onend = () => {
         setIsListening(false)
-        // Если финальный текст не был получен, но ввод был, отправляем его
-        if (input.trim() && !isLoading) {
-          // handleSubmit(new Event('submit')); // Можно автоматически отправить, но лучше дать пользователю контроль
-        }
       }
 
       recognition.onerror = (event) => {
@@ -133,9 +125,8 @@ export default function GrokChat({ user }: GrokChatProps) {
 
       recognitionRef.current = recognition
     }
-  }, [language, input, setInput, isLoading, t]) // Зависимость от языка для смены языка распознавания
+  }, [language, input, setInput, isLoading, t])
 
-  // Переключение голосового ввода
   const toggleVoiceInput = useCallback(() => {
     if (!SpeechRecognition) {
       toast.error(t("browserNotSupported"))
@@ -145,7 +136,6 @@ export default function GrokChat({ user }: GrokChatProps) {
     if (isListening) {
       recognitionRef.current?.stop()
     } else {
-      // Устанавливаем язык распознавания
       if (recognitionRef.current) {
         recognitionRef.current.lang = language === "ru" ? "ru-RU" : "en-US"
         recognitionRef.current.start()
@@ -192,7 +182,7 @@ export default function GrokChat({ user }: GrokChatProps) {
   return (
     <div className="min-h-screen bg-[#212121] text-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-gray-700">
+      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 border-b border-gray-700 bg-[#212121]">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -251,8 +241,10 @@ export default function GrokChat({ user }: GrokChatProps) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-[60px] pb-[120px]">
+        {" "}
+        {/* Adjusted padding */}
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
@@ -274,6 +266,8 @@ export default function GrokChat({ user }: GrokChatProps) {
             </div>
           ) : (
             <div className="py-8 space-y-8">
+              {" "}
+              {/* Added back vertical padding for messages */}
               {messages.map((message) => (
                 <div key={message.id} className="group">
                   <div className="flex gap-4 mb-4">
@@ -301,7 +295,6 @@ export default function GrokChat({ user }: GrokChatProps) {
                               code({ node, inline, className, children, ...props }) {
                                 const match = /language-(\w+)/.exec(className || "")
 
-                                // Специальная обработка для thinking блоков
                                 if (match && match[1] === "thinking") {
                                   return (
                                     <details className="my-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-900/10 to-purple-900/10">
@@ -433,7 +426,6 @@ export default function GrokChat({ user }: GrokChatProps) {
                   )}
                 </div>
               ))}
-
               {isLoading && (
                 <div className="group">
                   <div className="flex gap-4 mb-4">
@@ -479,58 +471,58 @@ export default function GrokChat({ user }: GrokChatProps) {
             </div>
           )}
         </ScrollArea>
+      </div>
 
-        {/* Input Area */}
-        <div className="p-4 border-t border-gray-700">
-          <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleFormSubmit} className="relative">
-              <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
-                <Input
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder={isListening ? t("listening") : t("askSomething")}
-                  disabled={isLoading || isListening}
-                  className="flex-1 bg-transparent border-0 pl-4 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
+      {/* Input Area */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 border-t border-gray-700 bg-[#212121]">
+        <div className="max-w-4xl mx-auto">
+          <form onSubmit={handleFormSubmit} className="relative">
+            <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
+              <Input
+                value={input}
+                onChange={handleInputChange}
+                placeholder={isListening ? t("listening") : t("askSomething")}
+                disabled={isLoading || isListening}
+                className="flex-1 bg-transparent border-0 pl-4 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
 
-                <div className="absolute right-3 flex items-center gap-2">
+              <div className="absolute right-3 flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  disabled={isLoading || !SpeechRecognition}
+                  size="sm"
+                  className={`h-8 w-8 p-0 ${isListening ? "bg-red-600 animate-pulse" : "bg-transparent"} text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
+
+                {isLoading ? (
                   <Button
                     type="button"
-                    onClick={toggleVoiceInput}
-                    disabled={isLoading || !SpeechRecognition}
+                    onClick={stop}
                     size="sm"
-                    className={`h-8 w-8 p-0 ${isListening ? "bg-red-600 animate-pulse" : "bg-transparent"} text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className="h-8 w-8 p-0 bg-red-600 text-white hover:bg-red-700"
+                    title={t("stopGeneration")}
                   >
-                    <Mic className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
-
-                  {isLoading ? (
-                    <Button
-                      type="button"
-                      onClick={stop}
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-red-600 text-white hover:bg-red-700"
-                      title={t("stopGeneration")}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      disabled={!input.trim()}
-                      size="sm"
-                      className="h-8 w-8 p-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:bg-gray-600 disabled:text-gray-400"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={!input.trim()}
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:bg-gray-600 disabled:text-gray-400"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
-            </form>
-
-            <div className="flex items-center justify-end mt-3">
-              <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4</p>
             </div>
+          </form>
+
+          <div className="flex items-center justify-end mt-3">
+            <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4</p>
           </div>
         </div>
       </div>
