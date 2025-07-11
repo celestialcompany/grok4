@@ -76,6 +76,8 @@ export const translations = {
     listening: "Слушаю...",
     voiceInputError: "Ошибка голосового ввода",
     browserNotSupported: "Браузер не поддерживает голосовой ввод",
+    // Removed regeneratingResponse: "Генерирую ответ заново...",
+    // Removed noPreviousMessage: "Нет предыдущего сообщения для повторной генерации.",
 
     // Messages
     copied: "Скопировано!",
@@ -170,6 +172,8 @@ export const translations = {
       "Вы имеете право на доступ, исправление или удаление вашей личной информации. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо вопросы о вашей конфиденциальности.",
     privacyConclusion: "Используя наш сервис, вы соглашаетесь с этой Политикой конфиденциальности.",
     freeChatDisclaimer: "Общение с Grok 4 абсолютно бесплатно!",
+    feedbackLiked: "Отзыв отправлен: Понравилось!",
+    feedbackDisliked: "Отзыв отправлен: Не понравилось.",
   },
   en: {
     // Auth
@@ -248,6 +252,8 @@ export const translations = {
     listening: "Listening...",
     voiceInputError: "Voice input error",
     browserNotSupported: "Browser does not support voice input",
+    // Removed regeneratingResponse: "Regenerating response...",
+    // Removed noPreviousMessage: "No previous message to regenerate.",
 
     // Messages
     copied: "Copied!",
@@ -340,6 +346,8 @@ export const translations = {
       "You have the right to access, correct, or delete your personal information. Please contact us if you have any questions about your privacy.",
     privacyConclusion: "By using our service, you agree to this Privacy Policy.",
     freeChatDisclaimer: "Chatting with Grok 4 is completely free!",
+    feedbackLiked: "Feedback sent: Liked!",
+    feedbackDisliked: "Feedback sent: Disliked.",
   },
 } as const
 

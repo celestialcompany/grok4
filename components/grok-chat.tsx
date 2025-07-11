@@ -33,8 +33,6 @@ import {
   Copy,
   ThumbsUp,
   ThumbsDown,
-  RotateCcw,
-  Share,
   Mic,
   LogOut,
   Settings,
@@ -42,7 +40,6 @@ import {
   Zap,
   Sparkles,
   ChevronDown,
-  MoreHorizontal,
   X,
 } from "lucide-react"
 import { useRef, useEffect, useState, useCallback } from "react"
@@ -194,10 +191,6 @@ export default function GrokChat({ user }: GrokChatProps) {
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white hover:bg-gray-700">
-            <Share className="h-4 w-4 mr-2" />
-            {t("share")}
-          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -208,9 +201,6 @@ export default function GrokChat({ user }: GrokChatProps) {
             API
           </Button>
           <LanguageSwitcher />
-          <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white hover:bg-gray-700">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -405,6 +395,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        onClick={() => toast.success(t("feedbackLiked"))}
                       >
                         <ThumbsUp className="h-4 w-4" />
                       </Button>
@@ -412,16 +403,11 @@ export default function GrokChat({ user }: GrokChatProps) {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                        onClick={() => toast.info(t("feedbackDisliked"))}
                       >
                         <ThumbsDown className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
+                      {/* Removed the Regenerate button */}
                     </div>
                   )}
                 </div>
