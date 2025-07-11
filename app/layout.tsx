@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Grok 4 Chat",
   description: "Chat with Grok 4 AI by xAI",
   generator: "v0.dev",
+  icons: { icon: "/favicon.png" },
 }
 
 export default function RootLayout({
