@@ -40,16 +40,6 @@ export interface UserProfile {
   }
 }
 
-export interface FileUpload {
-  id: string
-  name: string
-  url: string
-  type: string
-  size: number
-  userId: string
-  uploadedAt: number
-}
-
 // Базовый класс для API клиента
 class ApiClient {
   private baseUrl: string
@@ -153,53 +143,6 @@ class ApiClient {
     return this.request<UserProfile>("/user/profile", {
       method: "PUT",
       body: JSON.stringify(updates),
-    })
-  }
-
-  // Files API
-  async uploadFile(file: File): Promise<ApiResponse<FileUpload>> {
-    const formData = new FormData()
-    formData.append("file", file)
-
-    const token = this.user ? await this.user.getIdToken() : null
-
-    try {
-      const response = await fetch(`${this.baseUrl}/upload`, {
-        method: "POST",
-        headers: {
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: data.error || `HTTP ${response.status}`,
-        }
-      }
-
-      return {
-        success: true,
-        data,
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Upload failed",
-      }
-    }
-  }
-
-  async getFiles(): Promise<ApiResponse<FileUpload[]>> {
-    return this.request<FileUpload[]>("/files")
-  }
-
-  async deleteFile(fileId: string): Promise<ApiResponse<void>> {
-    return this.request<void>(`/files/${fileId}`, {
-      method: "DELETE",
     })
   }
 

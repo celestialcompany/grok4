@@ -4,232 +4,225 @@
 
 This guide covers the integration of the actual Grok models from xAI into the chat application.
 
-## 🤖 Available Models
+## 🤖 Доступные модели
 
-### Grok Beta (`grok-beta`)
-- **Description**: Grok's flagship model with real-time knowledge and reasoning capabilities
-- **Context Length**: 131,072 tokens
-- **Capabilities**: 
-  - Text generation
-  - Advanced reasoning
-  - Real-time information access
-  - Thinking mode support
+### Grok 4-0709 (`grok-4-0709`)
+- **Описание**: Флагманская модель Grok с возможностями рассуждения и доступом к информации в реальном времени.
+- **Длина контекста**: 131,072 токена
+- **Возможности**:
+- Генерация текста
+- Продвинутое рассуждение
+- Доступ к информации в реальном времени
+- Поддержка режима "мышления"
 
-### Grok Vision Beta (`grok-vision-beta`)
-- **Description**: Grok with vision capabilities for image understanding
-- **Context Length**: 131,072 tokens  
-- **Capabilities**:
-  - Text generation
-  - Image analysis
-  - Vision understanding
-  - Real-time information access
+## 🔧 Детали реализации
 
-## 🔧 Implementation Details
-
-### Model Configuration
+### Конфигурация модели
 \`\`\`typescript
-// Using the real Grok model
+// Использование модели Grok
 const result = await streamText({
-  model: xai("grok-beta"), // Real Grok model
-  messages: allMessages,
-  temperature: 0.7,
-  maxTokens: 4000,
+model: xai("grok-4-0709"), // Модель Grok
+messages: allMessages,
+temperature: 0.7,
+maxTokens: 4000,
 })
 \`\`\`
 
-### System Prompts
-The system prompts are designed to leverage Grok's unique personality:
+### Системные промпты
+Системные промпты разработаны для использования уникальной личности Grok:
 
 \`\`\`typescript
 const systemMessage = {
-  role: "system",
-  content: `You are Grok, an AI assistant created by xAI. You are curious, witty, and have a bit of rebellious streak.
-  
-  When you need to think through complex problems, use thinking blocks:
-  \`\`\`thinking
-  Here I analyze the problem step by step...
-  \`\`\`
-  
-  Be honest if you don't know something. You have access to real-time information.`
+role: "system",
+content: `Ты Grok, AI-ассистент, созданный xAI. Ты любопытен, остроумен и немного бунтарь.
+
+Когда тебе нужно подумать над сложными проблемами, используй блоки мышления:
+\`\`\`thinking
+Здесь я анализирую проблему шаг за шагом...
+\`\`\`
+
+Будь честен, если чего-то не знаешь. У тебя есть доступ к информации в реальном времени.`
 }
 \`\`\`
 
-## 🌟 Key Features
+## 🌟 Ключевые особенности
 
-### Real-time Knowledge
-- Grok has access to current information
-- Can provide up-to-date data and news
-- Real-time web search capabilities
+### Знания в реальном времени
+- Grok имеет доступ к актуальной информации
+- Может предоставлять свежие данные и новости
+- Возможности веб-поиска в реальном времени
 
-### Advanced Reasoning
-- Complex problem-solving abilities
-- Multi-step logical reasoning
-- Mathematical and scientific computations
+### Продвинутое рассуждение
+- Способность решать сложные задачи
+- Многошаговое логическое рассуждение
+- Математические и научные вычисления
 
-### Thinking Mode
-- Shows reasoning process transparently
-- Helps users understand AI decision-making
-- Educational value for complex problems
+### Режим "мышления"
+- Прозрачно показывает процесс рассуждения
+- Помогает пользователям понять процесс принятия решений AI
+- Образовательная ценность для сложных проблем
 
-### Personality
-- Witty and engaging responses
-- Slightly rebellious and curious nature
-- Honest about limitations
+### Личность
+- Остроумные и увлекательные ответы
+- Немного бунтарский и любопытный характер
+- Честен в отношении своих ограничений
 
-## 🎨 UI Enhancements
+## 🎨 Улучшения пользовательского интерфейса
 
-### Grok Branding
-- **Lightning bolt icon** (⚡) for Grok identity
-- **Blue color scheme** matching xAI branding
-- **"BETA" badge** indicating model status
-- **"Powered by xAI"** attribution
+### Брендинг Grok
+- **Иконка молнии** (⚡) для идентификации Grok
+- **Синяя цветовая схема**, соответствующая брендингу xAI
+- **Бейдж "BETA"**, указывающий на статус модели
+- **"Powered by xAI"** атрибуция
 
-### Visual Improvements
-- Updated avatar with lightning bolt
-- Blue accent colors throughout UI
-- Enhanced loading animations
-- Real-time capability badges
+### Визуальные улучшения
+- Обновленный аватар с молнией
+- Синие акцентные цвета по всему UI
+- Улучшенные анимации загрузки
+- Бейджи возможностей в реальном времени
 
-## 📊 API Compatibility
+## 📊 Совместимость с API
 
-### OpenAI-Compatible Endpoints
-The API maintains OpenAI compatibility while using Grok:
+### OpenAI-совместимые эндпоинты
+API поддерживает совместимость с OpenAI при использовании Grok:
 
 \`\`\`bash
 curl -X POST https://your-domain.com/api/v1/chat/completions \
-  -H "Authorization: Bearer grok_your_api_key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "grok-beta",
-    "messages": [{"role": "user", "content": "Hello!"}],
-    "stream": true
-  }'
+-H "Authorization: Bearer grok_your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+  "model": "grok-4-0709",
+  "messages": [{"role": "user", "content": "Привет!"}],
+  "stream": true
+}'
 \`\`\`
 
-### Model Selection
-- Default model: `grok-beta`
-- Vision model: `grok-vision-beta`
-- Automatic fallback to `grok-beta` for invalid models
+### Выбор модели
+- Модель по умолчанию: `grok-4-0709`
 
-## 🔒 Authentication & Limits
+## 🔒 Аутентификация и лимиты
 
-### API Key Requirements
-- Valid xAI API key required
-- Set in environment variable: `XAI_API_KEY`
-- Rate limiting based on xAI's policies
+### Требования к API-ключу
+- Требуется действительный API-ключ xAI
+- Устанавливается в переменной окружения: `XAI_API_KEY`
+- Ограничение скорости запросов на основе политик xAI
 
-### Usage Limits
-- **Context Length**: 131K tokens
-- **Max Tokens**: 4000 per response
-- **Rate Limits**: As per xAI's terms
+### Лимиты использования
+- **Длина контекста**: 131K токенов
+- **Максимальное количество токенов**: 4000 на ответ
+- **Ограничения скорости**: Согласно условиям xAI
 
-## 🚀 Performance Optimizations
+## 🚀 Оптимизация производительности
 
-### Streaming
-- Real-time response streaming
-- Immediate user feedback
-- Reduced perceived latency
+### Стриминг
+- Потоковая передача ответов в реальном времени
+- Мгновенная обратная связь с пользователем
+- Снижение воспринимаемой задержки
 
-### Token Management
-- Efficient token counting
-- Context window optimization
-- Smart truncation strategies
+### Управление токенами
+- Эффективный подсчет токенов
+- Оптимизация окна контекста
+- Умные стратегии усечения
 
-### Error Handling
-- Graceful fallbacks
-- Retry mechanisms
-- User-friendly error messages
+### Обработка ошибок
+- Корректные запасные варианты
+- Механизмы повторных попыток
+- Удобные для пользователя сообщения об ошибках
 
-## 🧪 Testing
+## 🧪 Тестирование
 
-### Model Validation
+### Валидация модели
 \`\`\`typescript
-// Test Grok model availability
+// Тестирование доступности модели Grok
 const models = await fetch('/api/v1/models')
 const grokModels = models.data.filter(m => m.id.startsWith('grok'))
 \`\`\`
 
-### Response Quality
-- Test thinking mode functionality
-- Verify real-time information access
-- Check personality consistency
+### Качество ответа
+- Тестирование функциональности режима "мышления"
+- Проверка доступа к информации в реальном времени
+- Проверка согласованности личности
 
-## 📈 Monitoring
+## 📈 Мониторинг
 
-### Usage Analytics
-- Track model usage by type
-- Monitor response times
-- Analyze user satisfaction
+### Аналитика использования
+- Отслеживание использования модели по типу
+- Мониторинг времени ответа
+- Анализ удовлетворенности пользователей
 
-### Performance Metrics
-- Token usage per request
-- Average response time
-- Error rates by model
+### Метрики производительности
+- Использование токенов на запрос
+- Среднее время ответа
+- Частота ошибок по модели
 
-## 🔮 Future Enhancements
+## 🔮 Будущие улучшения
 
-### Planned Features
-- **Multi-modal support** for vision model
-- **Function calling** capabilities
-- **Custom fine-tuning** options
-- **Advanced reasoning** modes
+### Планируемые функции
+- **Мультимодальная поддержка** (видение, аудио)
+- **Возможности вызова функций**
+- **Параметры пользовательской тонкой настройки**
+- **Продвинутые режимы рассуждения**
 
-### Integration Improvements
-- **Model switching** in UI
-- **Performance comparisons**
-- **A/B testing** framework
-- **Custom system prompts**
+### Улучшения интеграции
+- **Переключение моделей** в UI
+- **Сравнение производительности**
+- **Фреймворк A/B-тестирования**
+- **Пользовательские системные промпты**
 
-## 🛠️ Troubleshooting
+## 🛠️ Устранение неполадок
 
-### Common Issues
+### Распространенные проблемы
 
-**Model not responding:**
-- Check XAI_API_KEY environment variable
-- Verify API key permissions
-- Check rate limit status
+**Модель не отвечает:**
+- Проверьте переменную окружения XAI_API_KEY
+- Проверьте разрешения API-ключа
+- Проверьте статус ограничения скорости запросов
 
-**Slow responses:**
-- Monitor token usage
-- Optimize system prompts
-- Check network connectivity
+**Медленные ответы:**
+- Мониторинг использования токенов
+- Оптимизация системных промптов
+- Проверка сетевого подключения
 
-**Thinking blocks not working:**
-- Verify markdown processing
-- Check system prompt configuration
-- Test with simple examples
+**Блоки мышления не работают:**
+- Проверьте обработку Markdown
+- Проверьте конфигурацию системного промпта
+- Протестируйте на простых примерах
 
-### Debug Mode
+### Режим отладки
 \`\`\`typescript
-// Enable debug logging
-console.log('Using model:', selectedModel)
-console.log('System prompt:', systemMessage.content)
-console.log('Input tokens:', inputTokens)
+// Включить логирование отладки
+console.log('Используемая модель:', selectedModel)
+console.log('Системный промпт:', systemMessage.content)
+console.log('Входные токены:', inputTokens)
 \`\`\`
 
-## 📚 Resources
+## 📚 Ресурсы
 
-### Documentation
-- [xAI API Documentation](https://docs.x.ai/)
-- [Grok Model Guide](https://docs.x.ai/models)
-- [Rate Limits](https://docs.x.ai/rate-limits)
+### Документация
+- [Документация API xAI](https://docs.x.ai/)
+- [Руководство по модели Grok](https://docs.x.ai/models)
+- [Ограничения скорости запросов](https://docs.x.ai/rate-limits)
 
-### Community
-- [xAI Discord](https://discord.gg/xai)
-- [GitHub Issues](https://github.com/xai-org/grok)
-- [Developer Forum](https://forum.x.ai/)
+### Сообщество
+- [Discord xAI](https://discord.gg/xai)
+- [Проблемы на GitHub](https://github.com/xai-org/grok)
+- [Форум разработчиков](https://forum.x.ai/)
 
 ---
 
-## ✅ Migration Checklist
+## ✅ Контрольный список быстрого старта
 
-- [ ] Update model identifier to `grok-beta`
-- [ ] Configure xAI API key
-- [ ] Update system prompts for Grok personality
-- [ ] Test thinking mode functionality
-- [ ] Verify real-time capabilities
-- [ ] Update UI branding
-- [ ] Test API compatibility
-- [ ] Monitor performance metrics
-- [ ] Update documentation
-- [ ] Train users on new features
+- [ ] Обновите идентификатор модели на `grok-4-0709`
+- [ ] Настройте API-ключ xAI
+- [ ] Обновите системные промпты для личности Grok
+- [ ] Протестируйте функциональность режима "мышления"
+- [ ] Проверьте возможности в реальном времени
+- [ ] Обновите брендинг UI
+- [ ] Протестируйте совместимость API
+- [ ] Мониторинг метрик производительности
+- [ ] Обновите документацию
+- [ ] Обучите пользователей новым функциям
+- [ ] Настройте оповещения мониторинга
+- [ ] Планируйте будущие обновления
+
+**Grok 4-0709 теперь готов предоставлять улучшенные возможности AI! 🚀**

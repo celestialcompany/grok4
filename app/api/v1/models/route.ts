@@ -7,7 +7,7 @@ export const GET = withApiAuth(async (req: AuthenticatedApiRequest) => {
       {
         id: "grok-4-0709",
         object: "model",
-        created: 1720483200, // July 9, 2025
+        created: 1720483200, // July 9, 2024
         owned_by: "xai",
         permission: [],
         root: "grok-4-0709",
@@ -17,7 +17,7 @@ export const GET = withApiAuth(async (req: AuthenticatedApiRequest) => {
         context_length: 131072,
         capabilities: ["text", "reasoning", "real-time", "thinking"],
         version: "4.0",
-        release_date: "2025-07-09",
+        release_date: "2024-07-09",
       },
       {
         id: "grok-vision-beta",

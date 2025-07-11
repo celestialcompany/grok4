@@ -17,12 +17,6 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
     const messagesSnapshot = await getDocs(messagesQuery)
     const totalMessages = messagesSnapshot.size
 
-    // Получаем статистику файлов
-    const filesRef = collection(db, "files")
-    const filesQuery = query(filesRef, where("userId", "==", req.user.uid))
-    const filesSnapshot = await getDocs(filesQuery)
-    const totalFiles = filesSnapshot.size
-
     // Последние чаты
     const recentChatsQuery = query(
       chatsRef,
@@ -39,7 +33,6 @@ export const GET = withAuth(async (req: AuthenticatedRequest) => {
     const stats = {
       totalChats,
       totalMessages,
-      totalFiles,
       recentChats,
       averageMessagesPerChat: totalChats > 0 ? Math.round(totalMessages / totalChats) : 0,
     }

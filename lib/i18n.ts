@@ -73,10 +73,9 @@ export const translations = {
     stopGeneration: "Остановить генерацию",
     generating: "Генерирую ответ...",
     generationStopped: "Генерация остановлена",
-
-    // File upload
-    filesUploaded: "Загружено файлов: {count}",
-    uploadError: "Ошибка загрузки {fileName}",
+    listening: "Слушаю...", // New
+    voiceInputError: "Ошибка голосового ввода", // New
+    browserNotSupported: "Браузер не поддерживает голосовой ввод", // New
 
     // Messages
     copied: "Скопировано!",
@@ -169,10 +168,9 @@ export const translations = {
     stopGeneration: "Stop generation",
     generating: "Generating response...",
     generationStopped: "Generation stopped",
-
-    // File upload
-    filesUploaded: "Files uploaded: {count}",
-    uploadError: "Upload error {fileName}",
+    listening: "Listening...", // New
+    voiceInputError: "Voice input error", // New
+    browserNotSupported: "Browser does not support voice input", // New
 
     // Messages
     copied: "Copied!",

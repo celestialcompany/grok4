@@ -1,5 +1,17 @@
 "use client"
 
+import type React from "react"
+// Helper for browser-native SpeechRecognition
+// (Chrome ships it as webkitSpeechRecognition)
+const SpeechRecognition =
+  typeof window !== "undefined"
+    ? window.SpeechRecognition ||
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore – webkit prefix for older Chrome versions
+      window.webkitSpeechRecognition
+    : undefined
+type SpeechRecognitionType = InstanceType<typeof SpeechRecognition> | null
+
 import { useChat } from "ai/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,20 +36,16 @@ import {
   RotateCcw,
   Share,
   Mic,
-  Paperclip,
-  ChevronDown,
-  MoreHorizontal,
-  Upload,
-  File,
-  ImageIcon,
-  X,
   LogOut,
   Settings,
   Key,
   Zap,
   Sparkles,
+  ChevronDown,
+  MoreHorizontal,
+  X,
 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
 import { auth } from "@/lib/firebase"
 import { signOut, type User } from "firebase/auth"
@@ -51,30 +59,99 @@ interface GrokChatProps {
 export default function GrokChat({ user }: GrokChatProps) {
   const { t } = useLanguage()
   const { language } = useLanguage()
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop } = useChat({
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<SpeechRecognitionType>(null)
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput } = useChat({
     body: {
       language: language,
     },
-    onResponse: () => {
-      setIsGenerating(true)
-    },
     onFinish: () => {
-      setIsGenerating(false)
+      // Останавливаем голосовой ввод после получения ответа
+      if (isListening && recognitionRef.current) {
+        recognitionRef.current.stop()
+        setIsListening(false)
+      }
     },
     onError: () => {
-      setIsGenerating(false)
+      if (isListening && recognitionRef.current) {
+        recognitionRef.current.stop()
+        setIsListening(false)
+      }
     },
   })
+
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string; url: string; type: string }>>([])
-  const [isUploading, setIsUploading] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
 
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
+
+  // Инициализация SpeechRecognition
+  useEffect(() => {
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false // Останавливать после каждого результата
+      recognition.interimResults = true // Промежуточные результаты
+
+      recognition.onstart = () => {
+        setIsListening(true)
+        toast.info(t("listening"))
+      }
+
+      recognition.onresult = (event) => {
+        let interimTranscript = ""
+        let finalTranscript = ""
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
+          }
+        }
+
+        // Обновляем поле ввода с финальным или промежуточным текстом
+        setInput(input + finalTranscript + interimTranscript)
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+        // Если финальный текст не был получен, но ввод был, отправляем его
+        if (input.trim() && !isLoading) {
+          // handleSubmit(new Event('submit')); // Можно автоматически отправить, но лучше дать пользователю контроль
+        }
+      }
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error)
+        setIsListening(false)
+        toast.error(`${t("voiceInputError")}: ${event.error}`)
+      }
+
+      recognitionRef.current = recognition
+    }
+  }, [language, input, setInput, isLoading, t]) // Зависимость от языка для смены языка распознавания
+
+  // Переключение голосового ввода
+  const toggleVoiceInput = useCallback(() => {
+    if (!SpeechRecognition) {
+      toast.error(t("browserNotSupported"))
+      return
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop()
+    } else {
+      // Устанавливаем язык распознавания
+      if (recognitionRef.current) {
+        recognitionRef.current.lang = language === "ru" ? "ru-RU" : "en-US"
+        recognitionRef.current.start()
+      }
+    }
+  }, [isListening, language, t])
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -94,48 +171,6 @@ export default function GrokChat({ user }: GrokChatProps) {
     }
   }
 
-  const handleFileUpload = async (files: FileList) => {
-    if (!files.length) return
-
-    setIsUploading(true)
-    const newFiles = []
-
-    for (const file of Array.from(files)) {
-      try {
-        const formData = new FormData()
-        formData.append("file", file)
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-
-        if (response.ok) {
-          const { url } = await response.json()
-          newFiles.push({
-            id: Math.random().toString(36),
-            name: file.name,
-            url,
-            type: file.type,
-          })
-        }
-      } catch (error) {
-        toast.error(t("uploadError", { fileName: file.name }))
-      }
-    }
-
-    setUploadedFiles((prev) => [...prev, ...newFiles])
-    setIsUploading(false)
-
-    if (newFiles.length > 0) {
-      toast.success(t("filesUploaded", { count: newFiles.length }))
-    }
-  }
-
-  const removeFile = (fileId: string) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.id !== fileId))
-  }
-
   const getUserInitials = (name: string) => {
     return name
       .split(" ")
@@ -146,6 +181,13 @@ export default function GrokChat({ user }: GrokChatProps) {
   }
 
   const displayName = user.displayName || user.email?.split("@")[0] || "Пользователь"
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (input.trim()) {
+      handleSubmit(e)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#212121] text-white flex flex-col">
@@ -158,9 +200,6 @@ export default function GrokChat({ user }: GrokChatProps) {
               <Sparkles className="h-3 w-3 text-yellow-400 absolute -top-1 -right-1" />
             </div>
             <h1 className="text-lg font-medium">{t("grok")} 4</h1>
-            <span className="text-xs bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full">
-              0709
-            </span>
           </div>
           <ChevronDown className="h-4 w-4 text-gray-400" />
         </div>
@@ -225,27 +264,12 @@ export default function GrokChat({ user }: GrokChatProps) {
                   </div>
                   <div>
                     <h2 className="text-4xl font-bold text-white">Grok 4</h2>
-                    <p className="text-sm text-blue-400">Latest Model • July 2024</p>
                   </div>
                 </div>
                 <h3 className="text-xl font-medium text-gray-300">
                   {t("helloUser", { name: displayName.split(" ")[0] })}
                 </h3>
                 <p className="text-gray-400">{t("howCanIHelp")}</p>
-                <div className="flex flex-wrap gap-2 justify-center mt-6">
-                  <span className="text-xs bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full">
-                    🌐 Real-time knowledge
-                  </span>
-                  <span className="text-xs bg-green-600/20 text-green-300 px-3 py-1 rounded-full">
-                    🧠 Advanced reasoning
-                  </span>
-                  <span className="text-xs bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full">
-                    💭 Thinking mode
-                  </span>
-                  <span className="text-xs bg-yellow-600/20 text-yellow-300 px-3 py-1 rounded-full">
-                    ⚡ Enhanced performance
-                  </span>
-                </div>
               </div>
             </div>
           ) : (
@@ -410,7 +434,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                 </div>
               ))}
 
-              {(isLoading || isGenerating) && (
+              {isLoading && (
                 <div className="group">
                   <div className="flex gap-4 mb-4">
                     <Avatar className="h-8 w-8 flex-shrink-0">
@@ -456,73 +480,31 @@ export default function GrokChat({ user }: GrokChatProps) {
           )}
         </ScrollArea>
 
-        {uploadedFiles.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2 px-4">
-            {uploadedFiles.map((file) => (
-              <div key={file.id} className="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-2 text-sm">
-                {file.type.startsWith("image/") ? (
-                  <ImageIcon className="h-4 w-4 text-blue-400" />
-                ) : (
-                  <File className="h-4 w-4 text-green-400" />
-                )}
-                <span className="text-gray-200 truncate max-w-32">{file.name}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 text-gray-400 hover:text-red-400"
-                  onClick={() => removeFile(file.id)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Input Area */}
         <div className="p-4 border-t border-gray-700">
           <div className="max-w-4xl mx-auto">
-            <form onSubmit={handleSubmit} className="relative">
+            <form onSubmit={handleFormSubmit} className="relative">
               <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,.pdf,.txt,.doc,.docx"
-                  onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute left-3 h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-600"
-                  onClick={() => document.getElementById("file-upload")?.click()}
-                  disabled={isUploading}
-                >
-                  {isUploading ? <Upload className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
-                </Button>
-
                 <Input
                   value={input}
                   onChange={handleInputChange}
-                  placeholder={t("askSomething")}
-                  disabled={isLoading}
-                  className="flex-1 bg-transparent border-0 pl-12 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder={isListening ? t("listening") : t("askSomething")}
+                  disabled={isLoading || isListening}
+                  className="flex-1 bg-transparent border-0 pl-4 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
 
                 <div className="absolute right-3 flex items-center gap-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    onClick={toggleVoiceInput}
+                    disabled={isLoading || !SpeechRecognition}
                     size="sm"
-                    className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-600"
+                    className={`h-8 w-8 p-0 ${isListening ? "bg-red-600 animate-pulse" : "bg-transparent"} text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     <Mic className="h-4 w-4" />
                   </Button>
 
-                  {isLoading || isGenerating ? (
+                  {isLoading ? (
                     <Button
                       type="button"
                       onClick={stop}
@@ -546,7 +528,9 @@ export default function GrokChat({ user }: GrokChatProps) {
               </div>
             </form>
 
-            <p className="text-xs text-gray-400 text-center mt-3">{t("disclaimer")} • Powered by Grok 4 (July 2024)</p>
+            <div className="flex items-center justify-end mt-3">
+              <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4</p>
+            </div>
           </div>
         </div>
       </div>

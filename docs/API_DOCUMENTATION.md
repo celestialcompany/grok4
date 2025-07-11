@@ -24,9 +24,9 @@ Authorization: Bearer <firebase-id-token>
 
 \`\`\`json
 {
-  "success": boolean,
-  "data": any,      // Присутствует при success: true
-  "error": string   // Присутствует при success: false
+"success": boolean,
+"data": any,      // Присутствует при success: true
+"error": string   // Присутствует при success: false
 }
 \`\`\`
 
@@ -51,18 +51,18 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": [
-    {
-      "id": "chat_id",
-      "title": "Название чата",
-      "userId": "user_id",
-      "createdAt": 1234567890,
-      "updatedAt": 1234567890,
-      "messageCount": 5,
-      "lastMessage": "Последнее сообщение..."
-    }
-  ]
+"success": true,
+"data": [
+  {
+    "id": "chat_id",
+    "title": "Название чата",
+    "userId": "user_id",
+    "createdAt": 1234567890,
+    "updatedAt": 1234567890,
+    "messageCount": 5,
+    "lastMessage": "Последнее сообщение..."
+  }
+]
 }
 \`\`\`
 
@@ -73,22 +73,22 @@ Authorization: Bearer <firebase-id-token>
 **Тело запроса:**
 \`\`\`json
 {
-  "title": "Название нового чата"
+"title": "Название нового чата"
 }
 \`\`\`
 
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "id": "new_chat_id",
-    "title": "Название нового чата",
-    "userId": "user_id",
-    "createdAt": 1234567890,
-    "updatedAt": 1234567890,
-    "messageCount": 0
-  }
+"success": true,
+"data": {
+  "id": "new_chat_id",
+  "title": "Название нового чата",
+  "userId": "user_id",
+  "createdAt": 1234567890,
+  "updatedAt": 1234567890,
+  "messageCount": 0
+}
 }
 \`\`\`
 
@@ -102,15 +102,15 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "id": "chat_id",
-    "title": "Название чата",
-    "userId": "user_id",
-    "createdAt": 1234567890,
-    "updatedAt": 1234567890,
-    "messageCount": 5
-  }
+"success": true,
+"data": {
+  "id": "chat_id",
+  "title": "Название чата",
+  "userId": "user_id",
+  "createdAt": 1234567890,
+  "updatedAt": 1234567890,
+  "messageCount": 5
+}
 }
 \`\`\`
 
@@ -124,22 +124,22 @@ Authorization: Bearer <firebase-id-token>
 **Тело запроса:**
 \`\`\`json
 {
-  "title": "Новое название чата"
+"title": "Новое название чата"
 }
 \`\`\`
 
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "id": "chat_id",
-    "title": "Новое название чата",
-    "userId": "user_id",
-    "createdAt": 1234567890,
-    "updatedAt": 1234567891,
-    "messageCount": 5
-  }
+"success": true,
+"data": {
+  "id": "chat_id",
+  "title": "Новое название чата",
+  "userId": "user_id",
+  "createdAt": 1234567890,
+  "updatedAt": 1234567891,
+  "messageCount": 5
+}
 }
 \`\`\`
 
@@ -153,10 +153,10 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "message": "Chat deleted successfully"
-  }
+"success": true,
+"data": {
+  "message": "Chat deleted successfully"
+}
 }
 \`\`\`
 
@@ -178,17 +178,17 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": [
-    {
-      "id": "message_id",
-      "content": "Текст сообщения",
-      "role": "user",
-      "chatId": "chat_id",
-      "userId": "user_id",
-      "timestamp": 1234567890
-    }
-  ]
+"success": true,
+"data": [
+  {
+    "id": "message_id",
+    "content": "Текст сообщения",
+    "role": "user",
+    "chatId": "chat_id",
+    "userId": "user_id",
+    "timestamp": 1234567890
+  }
+]
 }
 \`\`\`
 
@@ -202,23 +202,23 @@ Authorization: Bearer <firebase-id-token>
 **Тело запроса:**
 \`\`\`json
 {
-  "content": "Текст сообщения",
-  "role": "user"
+"content": "Текст сообщения",
+"role": "user"
 }
 \`\`\`
 
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "id": "new_message_id",
-    "content": "Текст сообщения",
-    "role": "user",
-    "chatId": "chat_id",
-    "userId": "user_id",
-    "timestamp": 1234567890
-  }
+"success": true,
+"data": {
+  "id": "new_message_id",
+  "content": "Текст сообщения",
+  "role": "user",
+  "chatId": "chat_id",
+  "userId": "user_id",
+  "timestamp": 1234567890
+}
 }
 \`\`\`
 
@@ -233,19 +233,19 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "uid": "user_id",
-    "email": "user@example.com",
-    "displayName": "Имя пользователя",
-    "photoURL": "https://example.com/photo.jpg",
-    "createdAt": 1234567890,
-    "updatedAt": 1234567890,
-    "preferences": {
-      "language": "ru",
-      "theme": "dark"
-    }
+"success": true,
+"data": {
+  "uid": "user_id",
+  "email": "user@example.com",
+  "displayName": "Имя пользователя",
+  "photoURL": "https://example.com/photo.jpg",
+  "createdAt": 1234567890,
+  "updatedAt": 1234567890,
+  "preferences": {
+    "language": "ru",
+    "theme": "dark"
   }
+}
 }
 \`\`\`
 
@@ -256,99 +256,29 @@ Authorization: Bearer <firebase-id-token>
 **Тело запроса:**
 \`\`\`json
 {
+"displayName": "Новое имя",
+"preferences": {
+  "language": "en",
+  "theme": "light"
+}
+}
+\`\`\`
+
+**Ответ:**
+\`\`\`json
+{
+"success": true,
+"data": {
+  "uid": "user_id",
+  "email": "user@example.com",
   "displayName": "Новое имя",
+  "createdAt": 1234567890,
+  "updatedAt": 1234567891,
   "preferences": {
     "language": "en",
     "theme": "light"
   }
 }
-\`\`\`
-
-**Ответ:**
-\`\`\`json
-{
-  "success": true,
-  "data": {
-    "uid": "user_id",
-    "email": "user@example.com",
-    "displayName": "Новое имя",
-    "createdAt": 1234567890,
-    "updatedAt": 1234567891,
-    "preferences": {
-      "language": "en",
-      "theme": "light"
-    }
-  }
-}
-\`\`\`
-
----
-
-## Файлы (Files)
-
-### POST /api/upload
-
-Загрузить файл.
-
-**Тело запроса:**
-- `multipart/form-data` с полем `file`
-
-**Ограничения:**
-- Максимальный размер: 10MB
-- Разрешенные типы: изображения, PDF, текстовые файлы, документы Word
-
-**Ответ:**
-\`\`\`json
-{
-  "success": true,
-  "data": {
-    "id": "file_id",
-    "name": "document.pdf",
-    "url": "https://blob.vercel-storage.com/...",
-    "type": "application/pdf",
-    "size": 1024000,
-    "userId": "user_id",
-    "uploadedAt": 1234567890
-  }
-}
-\`\`\`
-
-### GET /api/files
-
-Получить файлы пользователя.
-
-**Ответ:**
-\`\`\`json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "file_id",
-      "name": "document.pdf",
-      "url": "https://blob.vercel-storage.com/...",
-      "type": "application/pdf",
-      "size": 1024000,
-      "userId": "user_id",
-      "uploadedAt": 1234567890
-    }
-  ]
-}
-\`\`\`
-
-### DELETE /api/files/{fileId}
-
-Удалить файл.
-
-**Параметры:**
-- `fileId` - ID файла
-
-**Ответ:**
-\`\`\`json
-{
-  "success": true,
-  "data": {
-    "message": "File deleted successfully"
-  }
 }
 \`\`\`
 
@@ -363,20 +293,20 @@ Authorization: Bearer <firebase-id-token>
 **Ответ:**
 \`\`\`json
 {
-  "success": true,
-  "data": {
-    "totalChats": 10,
-    "totalMessages": 150,
-    "totalFiles": 5,
-    "averageMessagesPerChat": 15,
-    "recentChats": [
-      {
-        "id": "chat_id",
-        "title": "Последний чат",
-        "updatedAt": 1234567890
-      }
-    ]
-  }
+"success": true,
+"data": {
+  "totalChats": 10,
+  "totalMessages": 150,
+  "totalFiles": 5,
+  "averageMessagesPerChat": 15,
+  "recentChats": [
+    {
+      "id": "chat_id",
+      "title": "Последний чат",
+      "updatedAt": 1234567890
+    }
+  ]
+}
 }
 \`\`\`
 
@@ -389,40 +319,40 @@ Authorization: Bearer <firebase-id-token>
 **401 Unauthorized:**
 \`\`\`json
 {
-  "success": false,
-  "error": "Unauthorized: Missing or invalid token"
+"success": false,
+"error": "Unauthorized: Missing or invalid token"
 }
 \`\`\`
 
 **403 Forbidden:**
 \`\`\`json
 {
-  "success": false,
-  "error": "Access denied"
+"success": false,
+"error": "Access denied"
 }
 \`\`\`
 
 **404 Not Found:**
 \`\`\`json
 {
-  "success": false,
-  "error": "Chat not found"
+"success": false,
+"error": "Chat not found"
 }
 \`\`\`
 
 **400 Bad Request:**
 \`\`\`json
 {
-  "success": false,
-  "error": "Title is required"
+"success": false,
+"error": "Title is required"
 }
 \`\`\`
 
 **500 Internal Server Error:**
 \`\`\`json
 {
-  "success": false,
-  "error": "Failed to create chat"
+"success": false,
+"error": "Failed to create chat"
 }
 \`\`\`
 
@@ -441,9 +371,9 @@ apiClient.setUser(firebaseUser)
 // Получить чаты
 const response = await apiClient.getChats()
 if (response.success) {
-  console.log('Чаты:', response.data)
+console.log('Чаты:', response.data)
 } else {
-  console.error('Ошибка:', response.error)
+console.error('Ошибка:', response.error)
 }
 
 // Создать чат
@@ -459,20 +389,20 @@ const uploadResult = await apiClient.uploadFile(file)
 \`\`\`bash
 # Получить чаты
 curl -H "Authorization: Bearer <token>" \
-     https://your-domain.com/api/chats
+   https://your-domain.com/api/chats
 
 # Создать чат
 curl -X POST \
-     -H "Authorization: Bearer <token>" \
-     -H "Content-Type: application/json" \
-     -d '{"title":"Новый чат"}' \
-     https://your-domain.com/api/chats
+   -H "Authorization: Bearer <token>" \
+   -H "Content-Type: application/json" \
+   -d '{"title":"Новый чат"}' \
+   https://your-domain.com/api/chats
 
 # Загрузить файл
 curl -X POST \
-     -H "Authorization: Bearer <token>" \
-     -F "file=@document.pdf" \
-     https://your-domain.com/api/upload
+   -H "Authorization: Bearer <token>" \
+   -F "file=@document.pdf" \
+   https://your-domain.com/api/upload
 \`\`\`
 
 ---
