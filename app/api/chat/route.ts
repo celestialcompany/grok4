@@ -1,5 +1,6 @@
 import { streamText } from "ai"
 import { xai } from "@ai-sdk/xai"
+import type { CoreMessage, ImagePart, TextPart } from "ai" // Import types from ai
 
 export async function POST(req: Request) {
   try {
@@ -34,14 +35,32 @@ export async function POST(req: Request) {
     After thinking, provide a clear and helpful answer.`,
     }
 
-    const selectedModel = "grok-4-0709" // Теперь всегда используем текстовую модель
-    const processedMessages = messages // Файлов нет, сообщения остаются как есть
+    // Всегда используем grok-4-0709, так как она мультимодальна
+    const selectedModel = "grok-4-0709" as const
+
+    const processedMessages: CoreMessage[] = messages.map((msg: any) => {
+      if (Array.isArray(msg.content)) {
+        // Если контент является массивом, это мультимодальное сообщение
+        return {
+          role: msg.role,
+          content: msg.content.map((part: any) => {
+            if (part.type === "image" && part.image) {
+              // AI SDK ожидает данные base64 без префикса data:image/...;base64,
+              const base64Data = part.image.split(",")[1] || part.image
+              return { type: "image", image: base64Data } as ImagePart
+            }
+            return { type: "text", text: part.text } as TextPart
+          }),
+        }
+      }
+      return { role: msg.role, content: msg.content } as CoreMessage
+    })
 
     const result = await streamText({
-      model: xai(selectedModel), // Динамический выбор модели
+      model: xai(selectedModel),
       messages: processedMessages,
       system: systemPrompts[language as keyof typeof systemPrompts] || systemPrompts.en,
-      maxTokens: 2000, // Уменьшено максимальное количество токенов для более быстрых ответов
+      maxTokens: 2000,
       temperature: 0.7,
     })
 

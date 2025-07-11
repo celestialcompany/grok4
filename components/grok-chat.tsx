@@ -41,6 +41,7 @@ import {
   Sparkles,
   ChevronDown,
   X,
+  ImageIcon,
 } from "lucide-react"
 import { useRef, useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
@@ -48,6 +49,7 @@ import { auth } from "@/lib/firebase"
 import { signOut, type User } from "firebase/auth"
 import { useLanguage } from "@/contexts/language-context"
 import LanguageSwitcher from "@/components/language-switcher"
+import type { Message, ImagePart, TextPart } from "ai" // Import types from ai
 
 interface GrokChatProps {
   user: User
@@ -58,8 +60,12 @@ export default function GrokChat({ user }: GrokChatProps) {
   const { language } = useLanguage()
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionType>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput } = useChat({
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
+  const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null)
+
+  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput, append } = useChat({
     body: {
       language: language,
     },
@@ -169,11 +175,259 @@ export default function GrokChat({ user }: GrokChatProps) {
 
   const displayName = user.displayName || user.email?.split("@")[0] || "Пользователь"
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        toast.error("Please select an image file.")
+        return
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setSelectedImagePreview(reader.result as string)
+        setSelectedImageBase64(reader.result as string) // Store full base64 string
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const clearSelectedImage = () => {
+    setSelectedImagePreview(null)
+    setSelectedImageBase64(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "" // Clear the file input
+    }
+  }
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (input.trim()) {
-      handleSubmit(e)
+    if (!input.trim() && !selectedImageBase64) {
+      return // Don't send empty messages
     }
+
+    const userMessage: Message = {
+      id: Date.now().toString(), // Temporary ID
+      role: "user",
+      content: [],
+    } as Message // Cast to Message to satisfy type, will populate content below
+
+    if (input.trim()) {
+      ;(userMessage.content as TextPart[]).push({ type: "text", text: input.trim() })
+    }
+    if (selectedImageBase64) {
+      ;(userMessage.content as ImagePart[]).push({ type: "image", image: selectedImageBase64 })
+    }
+
+    // If content is an array with only one text part, simplify it to a string
+    if (
+      Array.isArray(userMessage.content) &&
+      userMessage.content.length === 1 &&
+      userMessage.content[0].type === "text"
+    ) {
+      userMessage.content = userMessage.content[0].text
+    }
+
+    append(userMessage)
+    setInput("")
+    clearSelectedImage()
+  }
+
+  const renderMessageContent = (content: string | (TextPart | ImagePart)[]) => {
+    if (typeof content === "string") {
+      return (
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({ node, inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || "")
+
+              if (match && match[1] === "thinking") {
+                return (
+                  <details className="my-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-900/10 to-purple-900/10">
+                    <summary className="px-4 py-2 cursor-pointer text-blue-400 font-medium border-b border-blue-500/30 hover:bg-blue-900/20 transition-colors flex items-center gap-2">
+                      🧠 Grok 4 Thinking
+                      <span className="text-xs text-gray-400">(click to view reasoning)</span>
+                    </summary>
+                    <div className="px-4 py-3 text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                      {String(children).replace(/\n$/, "")}
+                    </div>
+                  </details>
+                )
+              }
+
+              return !inline && match ? (
+                <div className="relative group/code">
+                  <SyntaxHighlighter
+                    style={oneDark}
+                    language={match[1]}
+                    PreTag="div"
+                    className="rounded-lg my-3 text-sm"
+                    customStyle={{
+                      background: "#1a1a1a",
+                      border: "1px solid #374151",
+                      fontSize: "14px",
+                      lineHeight: "1.5",
+                    }}
+                    showLineNumbers={false}
+                    wrapLines={false}
+                    {...props}
+                  >
+                    {String(children).replace(/\n$/, "")}
+                  </SyntaxHighlighter>
+                  <Button
+                    onClick={() => copyToClipboard(String(children))}
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <code className="bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono text-orange-300" {...props}>
+                  {children}
+                </code>
+              )
+            },
+            h1: ({ children }) => <h1 className="text-2xl font-bold mt-6 mb-4 text-white">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-xl font-bold mt-5 mb-3 text-white">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-lg font-bold mt-4 mb-2 text-white">{children}</h3>,
+            p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+            ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 ml-4">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 ml-4">{children}</ol>,
+            li: ({ children }) => <li className="text-gray-100">{children}</li>,
+            blockquote: ({ children }) => (
+              <blockquote className="border-l-4 border-blue-500 pl-4 my-3 italic text-gray-300 bg-gray-800/30 py-2 rounded-r">
+                {children}
+              </blockquote>
+            ),
+            a: ({ children, href }) => (
+              <a
+                href={href}
+                className="text-blue-400 hover:text-blue-300 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+            ),
+            strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+            em: ({ children }) => <em className="italic text-gray-200">{children}</em>,
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      )
+    } else if (Array.isArray(content)) {
+      return (
+        <div className="flex flex-col gap-2">
+          {content.map((part, index) => {
+            if (part.type === "text") {
+              return (
+                <ReactMarkdown
+                  key={index}
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    code({ node, inline, className, children, ...props }) {
+                      const match = /language-(\w+)/.exec(className || "")
+
+                      if (match && match[1] === "thinking") {
+                        return (
+                          <details className="my-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-900/10 to-purple-900/10">
+                            <summary className="px-4 py-2 cursor-pointer text-blue-400 font-medium border-b border-blue-500/30 hover:bg-blue-900/20 transition-colors flex items-center gap-2">
+                              🧠 Grok 4 Thinking
+                              <span className="text-xs text-gray-400">(click to view reasoning)</span>
+                            </summary>
+                            <div className="px-4 py-3 text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                              {String(children).replace(/\n$/, "")}
+                            </div>
+                          </details>
+                        )
+                      }
+
+                      return !inline && match ? (
+                        <div className="relative group/code">
+                          <SyntaxHighlighter
+                            style={oneDark}
+                            language={match[1]}
+                            PreTag="div"
+                            className="rounded-lg my-3 text-sm"
+                            customStyle={{
+                              background: "#1a1a1a",
+                              border: "1px solid #374151",
+                              fontSize: "14px",
+                              lineHeight: "1.5",
+                            }}
+                            showLineNumbers={false}
+                            wrapLines={false}
+                            {...props}
+                          >
+                            {String(children).replace(/\n$/, "")}
+                          </SyntaxHighlighter>
+                          <Button
+                            onClick={() => copyToClipboard(String(children))}
+                            size="sm"
+                            variant="ghost"
+                            className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <code
+                          className="bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono text-orange-300"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      )
+                    },
+                    h1: ({ children }) => <h1 className="text-2xl font-bold mt-6 mb-4 text-white">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mt-5 mb-3 text-white">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-lg font-bold mt-4 mb-2 text-white">{children}</h3>,
+                    p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 ml-4">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 ml-4">{children}</ol>,
+                    li: ({ children }) => <li className="text-gray-100">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-blue-500 pl-4 my-3 italic text-gray-300 bg-gray-800/30 py-2 rounded-r">
+                        {children}
+                      </blockquote>
+                    ),
+                    a: ({ children, href }) => (
+                      <a
+                        href={href}
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {children}
+                      </a>
+                    ),
+                    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-gray-200">{children}</em>,
+                  }}
+                >
+                  {part.text}
+                </ReactMarkdown>
+              )
+            } else if (part.type === "image") {
+              return (
+                <div key={index} className="my-2">
+                  <img
+                    src={part.image || "/placeholder.svg"}
+                    alt="User uploaded image"
+                    className="max-w-full h-auto rounded-lg border border-gray-700"
+                  />
+                </div>
+              )
+            }
+            return null
+          })}
+        </div>
+      )
+    }
+    return null
   }
 
   return (
@@ -277,107 +531,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                       <div className="font-medium text-sm text-gray-300">
                         {message.role === "user" ? t("you") : `${t("grok")} 4`}
                       </div>
-                      <div className="text-gray-100 leading-relaxed">
-                        {message.role === "assistant" ? (
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              code({ node, inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(className || "")
-
-                                if (match && match[1] === "thinking") {
-                                  return (
-                                    <details className="my-4 border border-blue-500/30 rounded-lg bg-gradient-to-r from-blue-900/10 to-purple-900/10">
-                                      <summary className="px-4 py-2 cursor-pointer text-blue-400 font-medium border-b border-blue-500/30 hover:bg-blue-900/20 transition-colors flex items-center gap-2">
-                                        🧠 Grok 4 Thinking
-                                        <span className="text-xs text-gray-400">(click to view reasoning)</span>
-                                      </summary>
-                                      <div className="px-4 py-3 text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                                        {String(children).replace(/\n$/, "")}
-                                      </div>
-                                    </details>
-                                  )
-                                }
-
-                                return !inline && match ? (
-                                  <div className="relative group/code">
-                                    <SyntaxHighlighter
-                                      style={oneDark}
-                                      language={match[1]}
-                                      PreTag="div"
-                                      className="rounded-lg my-3 text-sm"
-                                      customStyle={{
-                                        background: "#1a1a1a",
-                                        border: "1px solid #374151",
-                                        fontSize: "14px",
-                                        lineHeight: "1.5",
-                                      }}
-                                      showLineNumbers={false}
-                                      wrapLines={false}
-                                      {...props}
-                                    >
-                                      {String(children).replace(/\n$/, "")}
-                                    </SyntaxHighlighter>
-                                    <Button
-                                      onClick={() => copyToClipboard(String(children))}
-                                      size="sm"
-                                      variant="ghost"
-                                      className="absolute top-2 right-2 opacity-0 group-hover/code:opacity-100 transition-opacity h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
-                                    >
-                                      <Copy className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <code
-                                    className="bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono text-orange-300"
-                                    {...props}
-                                  >
-                                    {children}
-                                  </code>
-                                )
-                              },
-                              h1: ({ children }) => (
-                                <h1 className="text-2xl font-bold mt-6 mb-4 text-white">{children}</h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className="text-xl font-bold mt-5 mb-3 text-white">{children}</h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className="text-lg font-bold mt-4 mb-2 text-white">{children}</h3>
-                              ),
-                              p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
-                              ul: ({ children }) => (
-                                <ul className="list-disc list-inside mb-3 space-y-1 ml-4">{children}</ul>
-                              ),
-                              ol: ({ children }) => (
-                                <ol className="list-decimal list-inside mb-3 space-y-1 ml-4">{children}</ol>
-                              ),
-                              li: ({ children }) => <li className="text-gray-100">{children}</li>,
-                              blockquote: ({ children }) => (
-                                <blockquote className="border-l-4 border-blue-500 pl-4 my-3 italic text-gray-300 bg-gray-800/30 py-2 rounded-r">
-                                  {children}
-                                </blockquote>
-                              ),
-                              a: ({ children, href }) => (
-                                <a
-                                  href={href}
-                                  className="text-blue-400 hover:text-blue-300 underline"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {children}
-                                </a>
-                              ),
-                              strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
-                              em: ({ children }) => <em className="italic text-gray-200">{children}</em>,
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        ) : (
-                          <div className="whitespace-pre-wrap">{message.content}</div>
-                        )}
-                      </div>
+                      <div className="text-gray-100 leading-relaxed">{renderMessageContent(message.content)}</div>
                     </div>
                   </div>
 
@@ -387,7 +541,13 @@ export default function GrokChat({ user }: GrokChatProps) {
                         variant="ghost"
                         size="sm"
                         className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
-                        onClick={() => copyToClipboard(message.content)}
+                        onClick={() =>
+                          copyToClipboard(
+                            typeof message.content === "string"
+                              ? message.content
+                              : message.content.map((part) => (part.type === "text" ? part.text : "")).join(" "),
+                          )
+                        }
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -407,7 +567,6 @@ export default function GrokChat({ user }: GrokChatProps) {
                       >
                         <ThumbsDown className="h-4 w-4" />
                       </Button>
-                      {/* Removed the Regenerate button */}
                     </div>
                   )}
                 </div>
@@ -462,6 +621,24 @@ export default function GrokChat({ user }: GrokChatProps) {
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 border-t border-gray-700 bg-[#212121]">
         <div className="max-w-4xl mx-auto">
+          {selectedImagePreview && (
+            <div className="relative mb-4 w-32 h-32 rounded-lg overflow-hidden border border-gray-600">
+              <img
+                src={selectedImagePreview || "/placeholder.svg"}
+                alt="Selected preview"
+                className="w-full h-full object-cover"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute top-1 right-1 h-6 w-6 p-0 bg-black/50 text-white hover:bg-black/70"
+                onClick={clearSelectedImage}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           <form onSubmit={handleFormSubmit} className="relative">
             <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
               <Input
@@ -473,6 +650,18 @@ export default function GrokChat({ user }: GrokChatProps) {
               />
 
               <div className="absolute right-3 flex items-center gap-2">
+                <input type="file" ref={fileInputRef} accept="image/*" onChange={handleFileChange} className="hidden" />
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isLoading || isListening}
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-transparent text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Upload Image"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+
                 <Button
                   type="button"
                   onClick={toggleVoiceInput}
@@ -496,7 +685,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                 ) : (
                   <Button
                     type="submit"
-                    disabled={!input.trim()}
+                    disabled={!input.trim() && !selectedImageBase64}
                     size="sm"
                     className="h-8 w-8 p-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:bg-gray-600 disabled:text-gray-400"
                   >
