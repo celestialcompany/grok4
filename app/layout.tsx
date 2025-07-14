@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { LanguageProvider } from "@/contexts/language-context"
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
           <LanguageProvider>
             {children}
             <Analytics />
+            <SpeedInsights />
             <Toaster />
           </LanguageProvider>
         </Suspense>
