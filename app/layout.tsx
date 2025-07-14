@@ -9,7 +9,7 @@ import { Suspense } from "react"
 import { headers } from "next/headers" // Импортируем headers для доступа к заголовкам запроса
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://your-domain.com"), // Замените на ваш основной домен
+  metadataBase: new URL("https://stackway.tech"), // Замените на ваш основной домен
   title: {
     default: "StackWay - Your Witty AI Companion Powered by Grok 4",
     template: "%s | StackWay",
@@ -43,11 +43,11 @@ export const metadata: Metadata = {
     title: "StackWay - Your Witty AI Companion Powered by Grok 4",
     description:
       "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
-    url: "https://your-domain.com", // Замените на ваш основной домен
+    url: "https://stackway.tech", // Замените на ваш основной домен
     siteName: "StackWay",
     images: [
       {
-        url: "https://your-domain.com/og-image.jpg", // Замените на URL вашего OG-изображения
+        url: "https://stackway.tech/og-image.jpg", // Замените на URL вашего OG-изображения
         width: 1200,
         height: 630,
         alt: "StackWay - Grok 4 AI Chat",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     description:
       "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
     creator: "@yourtwitterhandle", // Замените на ваш Twitter-хендл
-    images: ["https://your-domain.com/twitter-image.jpg"], // Замените на URL вашего Twitter-изображения
+    images: ["https://stackway.tech/twitter-image.jpg"], // Замените на URL вашего Twitter-изображения
   },
   icons: {
     icon: "/favicon.png",
@@ -97,9 +97,9 @@ export default function RootLayout({
 
   // Определяем альтернативные языковые версии
   const alternateLanguages = [
-    { lang: "en", href: `https://${host}${pathname.replace(/^\/(ru|en)/, "/en")}` }, // Пример для английского
-    { lang: "ru", href: `https://${host}${pathname.replace(/^\/(ru|en)/, "/ru")}` }, // Пример для русского
-    { lang: "x-default", href: `https://${host}${pathname.replace(/^\/(ru|en)/, "/en")}` }, // Язык по умолчанию
+    { lang: "en", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/en")}` },
+    { lang: "ru", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/ru")}` },
+    { lang: "x-default", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/en")}` },
   ]
 
   return (

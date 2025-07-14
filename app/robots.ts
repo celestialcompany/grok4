@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/private/", "/admin/"], // Пример: запретить индексацию этих путей
     },
-    sitemap: "https://your-domain.com/sitemap.xml", // Замените на ваш домен
+    sitemap: "https://stackway.tech/sitemap.xml", // Замените на ваш домен
   }
 }

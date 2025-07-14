@@ -13,7 +13,7 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
-        has: [{ type: 'host', value: 'your-project.vercel.app' }], // Замените на ваш vercel.app домен
+        has: [{ type: 'host', value: 'stackway.tech' }], // Замените на ваш vercel.app домен
         headers: [{ key: 'X-Robots-Tag', value: 'noindex' }],
       },
     ];
