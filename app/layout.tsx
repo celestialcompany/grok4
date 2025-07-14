@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { LanguageProvider } from "@/contexts/language-context"
+import { Analytics } from "@vercel/analytics/next"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "StackWay - Your AI Companion",
@@ -19,10 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <LanguageProvider>
-          {children}
-          <Toaster />
-        </LanguageProvider>
+        <Suspense fallback={null}>
+          <LanguageProvider>
+            {children}
+            <Analytics />
+            <Toaster />
+          </LanguageProvider>
+        </Suspense>
       </body>
     </html>
   )
