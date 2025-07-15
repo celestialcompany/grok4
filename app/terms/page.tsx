@@ -8,43 +8,6 @@ import { ArrowLeft } from "lucide-react"
 export default function TermsOfServicePage() {
   const { t } = useLanguage()
 
-  // Пример данных для FAQ
-  const faqItems = [
-    {
-      question: t("termsSection1Title"),
-      answer: t("termsSection1Content"),
-    },
-    {
-      question: t("termsSection2Title"),
-      answer: t("termsSection2Content"),
-    },
-    {
-      question: t("termsSection3Title"),
-      answer: t("termsSection3Content"),
-    },
-    {
-      question: t("termsSection4Title"),
-      answer: t("termsSection4Content"),
-    },
-    {
-      question: t("termsSection5Title"),
-      answer: t("termsSection5Content"),
-    },
-  ]
-
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqItems.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  }
-
   return (
     <div className="min-h-screen bg-[#121212] text-white flex flex-col">
       <header className="w-full px-4 py-4 border-b border-gray-800 shadow-lg bg-[#1a1a1a] z-20">
@@ -82,9 +45,6 @@ export default function TermsOfServicePage() {
           <p>{t("termsConclusion")}</p>
         </div>
       </main>
-
-      {/* Добавляем Schema Markup для FAQPage */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       <footer className="w-full py-8 bg-gray-900 border-t border-gray-800 text-center text-gray-400 text-sm">
         <p>

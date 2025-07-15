@@ -6,31 +6,17 @@ import { LanguageProvider } from "@/contexts/language-context"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
-import { headers } from "next/headers" // Импортируем headers для доступа к заголовкам запроса
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://stackway.tech"), // Замените на ваш основной домен
+  metadataBase: new URL('https://your-domain.com'), // Замените на ваш домен
   title: {
     default: "StackWay - Your Witty AI Companion Powered by Grok 4",
     template: "%s | StackWay",
   },
-  description:
-    "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+  description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
   generator: "v0.dev",
   applicationName: "StackWay",
-  keywords: [
-    "Grok 4",
-    "xAI",
-    "AI chat",
-    "AI assistant",
-    "real-time AI",
-    "thinking mode",
-    "API management",
-    "Next.js",
-    "React",
-    "chatbot",
-    "artificial intelligence",
-  ],
+  keywords: ["Grok 4", "xAI", "AI chat", "AI assistant", "real-time AI", "thinking mode", "API management", "Next.js", "React", "chatbot", "artificial intelligence"],
   authors: [{ name: "StackWay Team" }],
   creator: "StackWay Team",
   publisher: "StackWay",
@@ -41,13 +27,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "StackWay - Your Witty AI Companion Powered by Grok 4",
-    description:
-      "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
-    url: "https://stackway.tech", // Замените на ваш основной домен
+    description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+    url: "https://your-domain.com", // Замените на ваш домен
     siteName: "StackWay",
     images: [
       {
-        url: "https://stackway.tech/og-image.jpg", // Замените на URL вашего OG-изображения
+        url: "https://your-domain.com/og-image.jpg", // Замените на URL вашего OG-изображения
         width: 1200,
         height: 630,
         alt: "StackWay - Grok 4 AI Chat",
@@ -59,10 +44,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "StackWay - Your Witty AI Companion Powered by Grok 4",
-    description:
-      "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+    description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
     creator: "@yourtwitterhandle", // Замените на ваш Twitter-хендл
-    images: ["https://stackway.tech/twitter-image.jpg"], // Замените на URL вашего Twitter-изображения
+    images: ["https://your-domain.com/twitter-image.jpg"], // Замените на URL вашего Twitter-изображения
   },
   icons: {
     icon: "/favicon.png",
@@ -81,6 +65,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // Добавьте другие метаданные по мере необходимости
 }
 
 export default function RootLayout({
@@ -88,28 +73,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const headerList = headers()
-  const host = headerList.get("host")
-  const protocol = headerList.get("x-forwarded-proto") || "https"
-  const pathname = headerList.get("x-pathname") || "/"
-
-  const canonicalUrl = `${protocol}://${host}${pathname}`
-
-  // Определяем альтернативные языковые версии
-  const alternateLanguages = [
-    { lang: "en", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/en")}` },
-    { lang: "ru", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/ru")}` },
-    { lang: "x-default", href: `https://stackway.tech${pathname.replace(/^\/(ru|en)/, "/en")}` },
-  ]
-
   return (
     <html lang="en">
-      <head>
-        <link rel="canonical" href={canonicalUrl} />
-        {alternateLanguages.map((lang) => (
-          <link key={lang.lang} rel="alternate" hrefLang={lang.lang} href={lang.href} />
-        ))}
-      </head>
       <body className="antialiased">
         <Suspense fallback={null}>
           <LanguageProvider>
