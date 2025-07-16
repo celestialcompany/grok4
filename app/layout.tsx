@@ -6,17 +6,31 @@ import { LanguageProvider } from "@/contexts/language-context"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Suspense } from "react"
+import Script from "next/script"
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://your-domain.com'), // Замените на ваш домен
+  metadataBase: new URL("https://your-domain.com"), // Замените на ваш домен
   title: {
     default: "StackWay - Your Witty AI Companion Powered by Grok 4",
     template: "%s | StackWay",
   },
-  description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+  description:
+    "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
   generator: "v0.dev",
   applicationName: "StackWay",
-  keywords: ["Grok 4", "xAI", "AI chat", "AI assistant", "real-time AI", "thinking mode", "API management", "Next.js", "React", "chatbot", "artificial intelligence"],
+  keywords: [
+    "Grok 4",
+    "xAI",
+    "AI chat",
+    "AI assistant",
+    "real-time AI",
+    "thinking mode",
+    "API management",
+    "Next.js",
+    "React",
+    "chatbot",
+    "artificial intelligence",
+  ],
   authors: [{ name: "StackWay Team" }],
   creator: "StackWay Team",
   publisher: "StackWay",
@@ -27,7 +41,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "StackWay - Your Witty AI Companion Powered by Grok 4",
-    description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+    description:
+      "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
     url: "https://your-domain.com", // Замените на ваш домен
     siteName: "StackWay",
     images: [
@@ -44,7 +59,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "StackWay - Your Witty AI Companion Powered by Grok 4",
-    description: "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
+    description:
+      "StackWay: Chat with Grok 4 AI by xAI, explore advanced features like real-time knowledge and transparent thinking mode, and manage API keys. Experience the future of AI.",
     creator: "@yourtwitterhandle", // Замените на ваш Twitter-хендл
     images: ["https://your-domain.com/twitter-image.jpg"], // Замените на URL вашего Twitter-изображения
   },
@@ -75,6 +91,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Google AdSense */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1236325938389744"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="antialiased">
         <Suspense fallback={null}>
           <LanguageProvider>
