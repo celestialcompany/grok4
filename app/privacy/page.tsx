@@ -42,6 +42,12 @@ export default function PrivacyPolicyPage() {
           <p>{t("privacySection4Content")}</p>
           <h3>{t("privacySection5Title")}</h3>
           <p>{t("privacySection5Content")}</p>
+          <h3>{t("privacySection6Title")}</h3>
+          <p>{t("privacySection6Content")}</p>
+          <h3>{t("privacySection77Title")}</h3>
+          <p>{t("privacySection77Content")}</p>
+          <h3>{t("privacySection8Title")}</h3>
+          <p>{t("privacySection8Content")}</p>
           <p>{t("privacyConclusion")}</p>
         </div>
       </main>

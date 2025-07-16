@@ -42,6 +42,12 @@ export default function TermsOfServicePage() {
           <p>{t("termsSection4Content")}</p>
           <h3>{t("termsSection5Title")}</h3>
           <p>{t("termsSection5Content")}</p>
+          <h3>{t("termsSection6Title")}</h3>
+          <p>{t("termsSection6Content")}</p>
+          <h3>{t("termsSection7Title")}</h3>
+          <p>{t("termsSection7Content")}</p>
+          <h3>{t("termsSection8Title")}</h3>
+          <p>{t("termsSection8Content")}</p>
           <p>{t("termsConclusion")}</p>
         </div>
       </main>

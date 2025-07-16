@@ -65,7 +65,21 @@ export default function GrokChat({ user }: GrokChatProps) {
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null)
 
+  const [initialChatMessages] = useState<Message[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedMessages = localStorage.getItem("chat_history")
+        return savedMessages ? JSON.parse(savedMessages) : []
+      } catch (error) {
+        console.error("Failed to parse chat history from localStorage:", error)
+        return []
+      }
+    }
+    return []
+  })
+
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput, append } = useChat({
+    initialMessages: initialChatMessages, // Pass initial messages here
     body: {
       language: language,
     },
@@ -79,6 +93,12 @@ export default function GrokChat({ user }: GrokChatProps) {
       if (isListening && recognitionRef.current) {
         recognitionRef.current.stop()
         setIsListening(false)
+      }
+    },
+    // Save messages to localStorage whenever they change
+    onMessagesChange: (currentMessages) => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("chat_history", JSON.stringify(currentMessages))
       }
     },
   })

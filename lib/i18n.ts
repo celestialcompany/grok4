@@ -157,23 +157,41 @@ export const translations = {
       "В StackWay мы ценим вашу конфиденциальность. Настоящая Политика конфиденциальности объясняет, как мы собираем, используем и раскрываем информацию о вас.",
     privacySection1Title: "Сбор информации",
     privacySection1Content:
-      "Мы собираем информацию, которую вы предоставляете нам напрямую, когда вы создаете аккаунт, используете наши сервисы или общаетесь с нами. Это может включать ваше имя, адрес электронной почты и данные об использовании.",
+      "Мы собираем информацию, которую вы предоставляете нам напрямую, когда вы создаете аккаунт, используете наши сервисы или общаетесь с нами. Это может включать ваше имя, адрес электронной почты, данные об использовании, а также содержание ваших взаимодействий с Grok 4.",
     privacySection2Title: "Использование информации",
     privacySection2Content:
-      "Мы используем собранную информацию для предоставления, поддержания и улучшения наших услуг, для персонализации вашего опыта, для общения с вами и для обеспечения безопасности наших услуг.",
+      "Мы используем собранную информацию для предоставления, поддержания и улучшения наших услуг, для персонализации вашего опыта, для общения с вами и для обеспечения безопасности наших услуг. Ваши взаимодействия с Grok 4 могут использоваться для улучшения производительности модели и качества ответов.",
     privacySection3Title: "Раскрытие информации",
     privacySection3Content:
-      "Мы не передаем вашу личную информацию третьим лицам, за исключением случаев, когда это необходимо для предоставления услуг, соблюдения закона или защиты наших прав.",
+      "Мы не передаем вашу личную информацию третьим лицам, за исключением случаев, когда это необходимо для предоставления услуг (например, поставщикам облачных услуг и AI-моделей, таким как xAI), соблюдения закона или защиты наших прав. Мы гарантируем, что любые третьи стороны, которым мы передаем данные, соблюдают строгие стандарты конфиденциальности.",
     privacySection4Title: "Безопасность данных",
     privacySection4Content:
-      "Мы принимаем разумные меры для защиты вашей информации от несанкционированного доступа, использования или раскрытия. Однако ни один метод передачи через Интернет или электронного хранения не является на 100% безопасным.",
+      "Мы принимаем разумные меры для защиты вашей информации от несанкционированного доступа, использования или раскрытия. Мы используем шифрование, контроль доступа и другие меры безопасности для защиты ваших данных. Однако ни один метод передачи через Интернет или электронного хранения не является на 100% безопасным.",
     privacySection5Title: "Ваши права",
     privacySection5Content:
-      "Вы имеете право на доступ, исправление или удаление вашей личной информации. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо вопросы о вашей конфиденциальности.",
+      "Вы имеете право на доступ, исправление или удаление вашей личной информации. Вы также можете запросить ограничение обработки ваших данных или возразить против нее. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо вопросы о вашей конфиденциальности или вы хотите воспользоваться своими правами.",
     privacyConclusion: "Используя наш сервис, вы соглашаетесь с этой Политикой конфиденциальности.",
     freeChatDisclaimer: "Общение с Grok 4 абсолютно бесплатно!",
     feedbackLiked: "Отзыв отправлен: Понравилось!",
     feedbackDisliked: "Отзыв отправлен: Не понравилось.",
+    // New terms and privacy content
+    termsSection6Title: "Поведение пользователя",
+    termsSection6Content:
+      "Вы соглашаетесь не использовать Сервис для любых незаконных или запрещенных настоящими Условиями целей. Вы не должны загружать, публиковать или передавать любой контент, который является незаконным, вредоносным, угрожающим, оскорбительным, клеветническим, вульгарным, непристойным или иным образом нежелательным.",
+    termsSection7Title: "Отказ от гарантий",
+    termsSection7Content:
+      "Сервис предоставляется на условиях «как есть» и «как доступно». Мы не даем никаких гарантий, явных или подразумеваемых, в отношении работы Сервиса или информации, контента, материалов или продуктов, включенных в него.",
+    termsSection8Title: "Ограничение ответственности",
+    termsSection8Content:
+      "Ни при каких обстоятельствах StackWay, его директора, сотрудники, партнеры, агенты, поставщики или аффилированные лица не несут ответственности за любые косвенные, случайные, специальные, последующие или штрафные убытки, включая, помимо прочего, потерю прибыли, данных, использования, деловой репутации или другие нематериальные потери, возникшие в результате (i) вашего доступа или использования или невозможности доступа или использования Сервиса; (ii) любого поведения или контента любой третьей стороны в Сервисе; (iii) любого контента, полученного из Сервиса; и (iv) несанкционированного доступа, использования или изменения ваших передач или контента, будь то на основании гарантии, контракта, деликта (включая халатность) или любой другой правовой теории, независимо от того, были ли мы проинформированы о возможности такого ущерба, и даже если средство правовой защиты, изложенное здесь, не достигло своей основной цели.",
+    privacySection6Title: "Сторонние сервисы",
+    privacySection6Content:
+      "Наш Сервис может содержать ссылки на сторонние веб-сайты или сервисы, которые не принадлежат и не контролируются StackWay. Мы не несем ответственности за политику конфиденциальности или практику любых сторонних сайтов или сервисов. Мы настоятельно рекомендуем вам ознакомиться с политикой конфиденциальности каждого сайта, который вы посещаете.",
+    privacySection77Content:
+      "Мы можем обновлять нашу Политику конфиденциальности время от времени. Мы уведомим вас о любых изменениях, опубликовав новую Политику конфиденциальности на этой странице. Рекомендуется периодически просматривать эту Политику конфиденциальности на предмет изменений. Изменения в этой Политике конфиденциальности вступают в силу с момента их публикации на этой странице.",
+    privacySection8Title: "Свяжитесь с нами",
+    privacySection8Content:
+      "Если у вас есть какие-либо вопросы об этой Политике конфиденциальности, пожалуйста, свяжитесь с нами по адресу support@stackway.tech.",
   },
   en: {
     // Auth
@@ -331,23 +349,41 @@ export const translations = {
       "At StackWay, we value your privacy. This Privacy Policy explains how we collect, use, and disclose information about you.",
     privacySection1Title: "Information Collection",
     privacySection1Content:
-      "We collect information you provide directly to us when you create an account, use our services, or communicate with us. This may include your name, email address, and usage data.",
+      "We collect information you provide directly to us when you create an account, use our services, or communicate with us. This may include your name, email address, usage data, and the content of your interactions with Grok 4.",
     privacySection2Title: "Use of Information",
     privacySection2Content:
-      "We use the information we collect to provide, maintain, and improve our services, to personalize your experience, to communicate with you, and to ensure the security of our services.",
+      "We use the information we collect to provide, maintain, and improve our services, to personalize your experience, to communicate with you, and to ensure the security of our services. Your interactions with Grok 4 may be used to improve model performance and response quality.",
     privacySection3Title: "Information Disclosure",
     privacySection3Content:
-      "We do not share your personal information with third parties except as necessary to provide our services, comply with the law, or protect our rights.",
+      "We do not share your personal information with third parties except as necessary to provide our services (e.g., to cloud providers and AI model providers like xAI), comply with the law, or protect our rights. We ensure that any third parties we share data with adhere to strict confidentiality standards.",
     privacySection4Title: "Data Security",
     privacySection4Content:
-      "We take reasonable measures to protect your information from unauthorized access, use, or disclosure. However, no method of transmission over the Internet or electronic storage is 100% secure.",
+      "We take reasonable measures to protect your information from unauthorized access, use, or disclosure. We use encryption, access controls, and other security measures to safeguard your data. However, no method of transmission over the Internet or electronic storage is 100% secure.",
     privacySection5Title: "Your Rights",
     privacySection5Content:
-      "You have the right to access, correct, or delete your personal information. Please contact us if you have any questions about your privacy.",
+      "You have the right to access, correct, or delete your personal information. You may also request to restrict or object to the processing of your data. Please contact us if you have any questions about your privacy or wish to exercise your rights.",
     privacyConclusion: "By using our service, you agree to this Privacy Policy.",
     freeChatDisclaimer: "Chatting with Grok 4 is completely free!",
     feedbackLiked: "Feedback sent: Liked!",
     feedbackDisliked: "Feedback sent: Disliked.",
+    // New terms and privacy content
+    termsSection6Title: "User Conduct",
+    termsSection6Content:
+      "You agree not to use the Service for any unlawful purpose or any purpose prohibited by these Terms. You shall not upload, post, or transmit any content that is unlawful, harmful, threatening, abusive, harassing, defamatory, vulgar, obscene, or otherwise objectionable.",
+    termsSection7Title: "Disclaimer of Warranties",
+    termsSection7Content:
+      "The Service is provided on an 'AS IS' and 'AS AVAILABLE' basis. We make no warranties, express or implied, regarding the operation of the Service or the information, content, materials, or products included on it.",
+    termsSection8Title: "Limitation of Liability",
+    termsSection8Content:
+      "In no event shall StackWay, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) your access to or use of or inability to access or use the Service; (ii) any conduct or content of any third party on the Service; (iii) any content obtained from the Service; and (iv) unauthorized access, use or alteration of your transmissions or content, whether based on warranty, contract, tort (including negligence) or any other legal theory, whether or not we have been informed of the possibility of such damage, and even if a remedy set forth herein is found to have failed of its essential purpose.",
+    privacySection6Title: "Third-Party Services",
+    privacySection6Content:
+      "Our Service may contain links to third-party websites or services that are not owned or controlled by StackWay. We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites or services. We strongly advise you to review the Privacy Policy of every site you visit.",
+    privacySection77Content:
+      "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.",
+    privacySection8Title: "Contact Us",
+    privacySection8Content:
+      "If you have any questions about this Privacy Policy, please contact us at support@stackway.tech.",
   },
 } as const
 
