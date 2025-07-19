@@ -66,7 +66,6 @@
     "recharts": "2.15.0",
     "remark-gfm": "latest",
     "sonner": "latest",
-    "stream": "latest",
     "svelte": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
