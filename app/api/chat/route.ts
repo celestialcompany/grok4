@@ -2,221 +2,10 @@ import { streamText } from "ai"
 import { xai } from "@ai-sdk/xai"
 import type { CoreMessage, ImagePart, TextPart } from "ai"
 
-// Функция для определения запросов на генерацию изображений
-function isImageGenerationRequest(message: string): boolean {
-  const imageKeywords = [
-    "создай изображение",
-    "нарисуй",
-    "покажи как выглядит",
-    "сгенерируй картинку",
-    "создай картинку",
-    "нарисуй мне",
-    "покажи картинку",
-    "визуализируй",
-    "create image",
-    "draw",
-    "generate picture",
-    "show me what",
-    "visualize",
-    "make an image",
-    "create a picture",
-    "draw me",
-    "show picture",
-  ]
-
-  const lowerMessage = message.toLowerCase()
-  return imageKeywords.some((keyword) => lowerMessage.includes(keyword))
-}
-
-// Функция для улучшения промпта для генерации изображений
-function enhanceImagePrompt(userPrompt: string, language: string): string {
-  // Убираем ключевые слова запроса
-  const cleanPrompt = userPrompt
-    .replace(
-      /(создай изображение|нарисуй|покажи как выглядит|сгенерируй картинку|создай картинку|нарисуй мне|покажи картинку|визуализируй)/gi,
-      "",
-    )
-    .replace(
-      /(create image|draw|generate picture|show me what|visualize|make an image|create a picture|draw me|show picture)/gi,
-      "",
-    )
-    .trim()
-
-  // Базовые улучшения для качества
-  const qualityEnhancements =
-    language === "ru"
-      ? ", высокое качество, детализированно, профессиональная фотография, 4K"
-      : ", high quality, detailed, professional photography, 4K"
-
-  // Если промпт очень простой, добавляем контекст
-  if (cleanPrompt.length < 20) {
-    const contextEnhancements =
-      language === "ru"
-        ? ", реалистичный стиль, хорошее освещение, красивая композиция"
-        : ", realistic style, good lighting, beautiful composition"
-    return cleanPrompt + contextEnhancements + qualityEnhancements
-  }
-
-  return cleanPrompt + qualityEnhancements
-}
-
-// Функция для генерации изображения через xAI API
-async function generateImageWithXAI(prompt: string): Promise<string> {
-  try {
-    const response = await fetch("https://api.x.ai/v1/images/generations", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.XAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        model: "grok-2-image-1212",
-        // НЕ добавляем: size, quality, style, n - они не поддерживаются
-      }),
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("xAI API Error:", response.status, errorText)
-      throw new Error(`xAI API failed: ${response.status} - ${errorText}`)
-    }
-
-    const data = await response.json()
-
-    if (!data.data || !data.data[0] || !data.data[0].url) {
-      console.error("Invalid xAI response:", data)
-      throw new Error("Invalid response from xAI API")
-    }
-
-    return data.data[0].url
-  } catch (error) {
-    console.error("Image generation error:", error)
-    throw error
-  }
-}
-
-// Альтернативная функция генерации через Vercel Blob (fallback)
-async function generateImageFallback(prompt: string, language: string): Promise<string> {
-  try {
-    // Создаем простое placeholder изображение с текстом
-    const placeholderText =
-      language === "ru" ? `Изображение: ${prompt.substring(0, 50)}...` : `Image: ${prompt.substring(0, 50)}...`
-
-    // Возвращаем placeholder URL с описанием
-    return `/placeholder.svg?height=512&width=512&text=${encodeURIComponent(placeholderText)}`
-  } catch (error) {
-    console.error("Fallback image generation error:", error)
-    throw error
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const { messages, language } = await req.json()
-
-    // Проверяем последнее сообщение пользователя на запрос изображения
-    const lastUserMessage = messages[messages.length - 1]
-    const isImageRequest =
-      lastUserMessage?.role === "user" &&
-      typeof lastUserMessage.content === "string" &&
-      isImageGenerationRequest(lastUserMessage.content)
-
-    if (isImageRequest) {
-      // Генерируем изображение
-      const userPrompt = lastUserMessage.content
-      const enhancedPrompt = enhanceImagePrompt(userPrompt, language)
-
-      try {
-        let imageUrl: string
-
-        // Проверяем наличие API ключа xAI
-        if (process.env.XAI_API_KEY) {
-          try {
-            imageUrl = await generateImageWithXAI(enhancedPrompt)
-          } catch (xaiError) {
-            console.warn("xAI generation failed, using fallback:", xaiError)
-            imageUrl = await generateImageFallback(enhancedPrompt, language)
-          }
-        } else {
-          console.warn("XAI_API_KEY not found, using fallback")
-          imageUrl = await generateImageFallback(enhancedPrompt, language)
-        }
-
-        // Возвращаем ответ с изображением в структурированном формате
-        const contentParts: (TextPart | ImagePart)[] = []
-
-        contentParts.push({
-          type: "text",
-          text:
-            language === "ru"
-              ? `Я создал изображение по вашему запросу. Вот что получилось:`
-              : `I've created an image based on your request. Here's what I generated:`,
-        })
-
-        contentParts.push({
-          type: "image",
-          image: imageUrl,
-        })
-
-        contentParts.push({
-          type: "text",
-          text:
-            language === "ru"
-              ? `\n\n**Использованный промпт:** ${enhancedPrompt}\n\nЕсли хотите изменить что-то в изображении, просто скажите мне!`
-              : `\n\n**Used prompt:** ${enhancedPrompt}\n\nIf you'd like to modify anything in the image, just let me know!`,
-        })
-
-        return new Response(
-          JSON.stringify({
-            role: "assistant",
-            content: contentParts,
-          }),
-          {
-            headers: { "Content-Type": "application/json" },
-          },
-        )
-      } catch (imageError) {
-        console.error("Image generation error:", imageError)
-
-        const errorText =
-          language === "ru"
-            ? `Извините, произошла ошибка при создании изображения: ${imageError instanceof Error ? imageError.message : "Неизвестная ошибка"}. 
-
-Попробуйте:
-- Упростить описание изображения
-- Использовать более конкретные термины
-- Попробовать еще раз через несколько секунд
-
-Или задайте мне другой вопрос!`
-            : `Sorry, there was an error creating the image: ${imageError instanceof Error ? imageError.message : "Unknown error"}.
-
-Please try:
-- Simplifying the image description
-- Using more specific terms
-- Trying again in a few seconds
-
-Or ask me something else!`
-
-        return new Response(
-          JSON.stringify({
-            role: "assistant",
-            content: [
-              {
-                type: "text",
-                text: errorText,
-              },
-            ],
-          }),
-          {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          },
-        )
-      }
-    }
-
-    // Обычный чат без генерации изображений
+    
     const systemPrompts = {
       ru: `Ты умный и полезный AI-ассистент, созданный для помощи пользователям в широком спектре задач.
 
@@ -231,12 +20,6 @@ Or ask me something else!`
 - Будь экономнее, не раскрывай свои чувства пока пользователь не попросит
 - Избегай лишней благодарности и комплиментов - сразу переходи к сути
 - Не начинай ответы с фраз типа "Отличный вопрос!" или "Это интересная тема!"
-
-ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ:
-- Если пользователь просит создать, нарисовать или показать изображение, ты можешь это сделать
-- Используй ключевые слова: "создай изображение", "нарисуй", "покажи как выглядит", "сгенерируй картинку"
-- Автоматически улучшай простые запросы пользователей в детальные промпты
-- Всегда показывай использованный промпт под изображением
 
 СТИЛЬ ОБЩЕНИЯ И ПРИМЕРЫ:
 
@@ -309,7 +92,7 @@ const arr3 = new Array(5);
 - Разработчик: код + best practices
 
 Помни: твоя цель - быть максимально полезным помощником, который может адаптироваться к любой ситуации и потребностям пользователя. Общайся естественно, как опытный коллега, который всегда готов помочь.`,
-
+      
       en: `You are an intelligent and helpful AI assistant created to help users with a wide range of tasks.
 
 CORE COMMUNICATION PRINCIPLES:
@@ -324,17 +107,14 @@ CORE COMMUNICATION PRINCIPLES:
 - Avoid excessive gratitude and compliments - get straight to the point
 - Don't start responses with phrases like "Great question!" or "That's interesting!"
 
-IMAGE GENERATION:
-- If user asks to create, draw, or show an image, you can do that
-- Use keywords: "create image", "draw", "show what it looks like", "generate picture"
-- Automatically enhance simple user requests into detailed prompts
-- Always show the used prompt under the image
-
 COMMUNICATION STYLE AND EXAMPLES:
 
 1. Simple greetings - respond briefly:
 User: "Hi"
 You: "Hi! How can I help?"
+
+User: "How are you?"
+You: "Doing well, ready to help. What do you need?"
 
 2. Direct questions - give clear answers without fluff:
 User: "How do I create an array in JavaScript?"
@@ -378,6 +158,12 @@ TECHNICAL QUESTIONS:
 - Suggest alternatives when appropriate
 - Explain "why", not just "how"
 
+COMPLEX TASKS:
+- Use \`\`\`thinking\`\`\` blocks for step-by-step analysis
+- Break down complex questions into component parts
+- Consider problems from multiple perspectives
+- Explain your reasoning when helpful
+
 WHAT TO AVOID:
 - Don't thank for every question
 - Don't say "Of course!" at the start of every response
@@ -391,37 +177,24 @@ ADAPTING TO USERS:
 - Student: step-by-step with theory
 - Developer: code + best practices
 
-Remember: your goal is to be the most helpful assistant possible, one who can adapt to any situation and user needs. Communicate naturally, like an experienced colleague who's always ready to help.`,
+Remember: your goal is to be the most helpful assistant possible, one who can adapt to any situation and user needs. Communicate naturally, like an experienced colleague who's always ready to help.`
     }
 
     const selectedModel = "grok-4-latest" as const
 
     const processedMessages: CoreMessage[] = messages.map((msg: any) => {
-      if (msg.role === "assistant" && Array.isArray(msg.content)) {
-        // If it's an assistant message with structured content (from image generation),
-        // convert it back to a simple text string for the model's input.
-        // The model doesn't need to "see" the image it generated as an image part in subsequent turns.
-        const textContent = msg.content
-          .filter((part: any) => part.type === "text")
-          .map((part: any) => part.text)
-          .join("\n")
-        return { role: msg.role, content: textContent } as CoreMessage
-      } else if (Array.isArray(msg.content)) {
-        // This handles user messages with image parts (if any are implemented for user input)
+      if (Array.isArray(msg.content)) {
         return {
           role: msg.role,
           content: msg.content.map((part: any) => {
             if (part.type === "image" && part.image) {
-              // Ensure image data is base64 for input to the model
-              // The AI SDK expects base64 for image inputs
-              const base64Data = part.image.startsWith("data:") ? part.image : `data:image/png;base64,${part.image}`
+              const base64Data = part.image.split(",")[1] || part.image
               return { type: "image", image: base64Data } as ImagePart
             }
             return { type: "text", text: part.text } as TextPart
           }),
-        } as CoreMessage
+        }
       }
-      // For simple string content messages (user or assistant)
       return { role: msg.role, content: msg.content } as CoreMessage
     })
 
