@@ -6,7 +6,7 @@ import type React from "react"
 const SpeechRecognition =
   typeof window !== "undefined"
     ? window.SpeechRecognition ||
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // eslint-disable-next-line @typescript-eslint/ban-types
       // @ts-ignore – webkit prefix for older Chrome versions
       window.webkitSpeechRecognition
     : undefined
@@ -42,6 +42,9 @@ import {
   ChevronDown,
   X,
   ImageIcon,
+  Download,
+  RefreshCw,
+  Palette,
 } from "lucide-react"
 import { useRef, useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
@@ -55,10 +58,37 @@ interface GrokChatProps {
   user: User
 }
 
+// Функция для определения запросов на генерацию изображений
+function isImageGenerationRequest(message: string): boolean {
+  const imageKeywords = [
+    "создай изображение",
+    "нарисуй",
+    "покажи как выглядит",
+    "сгенерируй картинку",
+    "создай картинку",
+    "нарисуй мне",
+    "покажи картинку",
+    "визуализируй",
+    "create image",
+    "draw",
+    "generate picture",
+    "show me what",
+    "visualize",
+    "make an image",
+    "create a picture",
+    "draw me",
+    "show picture",
+  ]
+
+  const lowerMessage = message.toLowerCase()
+  return imageKeywords.some((keyword) => lowerMessage.includes(keyword))
+}
+
 export default function GrokChat({ user }: GrokChatProps) {
   const { t } = useLanguage()
   const { language } = useLanguage()
   const [isListening, setIsListening] = useState(false)
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionType>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -79,7 +109,7 @@ export default function GrokChat({ user }: GrokChatProps) {
   })
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput, append } = useChat({
-    initialMessages: initialChatMessages, // Pass initial messages here
+    initialMessages: initialChatMessages,
     body: {
       language: language,
     },
@@ -88,18 +118,36 @@ export default function GrokChat({ user }: GrokChatProps) {
         recognitionRef.current.stop()
         setIsListening(false)
       }
+      setIsGeneratingImage(false)
     },
     onError: () => {
       if (isListening && recognitionRef.current) {
         recognitionRef.current.stop()
         setIsListening(false)
       }
+      setIsGeneratingImage(false)
     },
-    // Save messages to localStorage whenever they change
     onMessagesChange: (currentMessages) => {
       if (typeof window !== "undefined") {
         localStorage.setItem("chat_history", JSON.stringify(currentMessages))
       }
+    },
+    onResponse: async (response) => {
+      const contentType = response.headers.get("Content-Type")
+      if (contentType?.includes("application/json")) {
+        const data = await response.json()
+        if (data.role && data.content) {
+          append({
+            id: Date.now().toString(),
+            role: data.role,
+            content: data.content,
+          })
+          setIsGeneratingImage(false) // Остановить индикатор загрузки изображения
+          return true // Сигнализировать, что этот ответ обработан
+        }
+      }
+      // Для не-JSON ответов (например, текстовых потоков), пусть useChat обрабатывает их
+      return false
     },
   })
 
@@ -205,7 +253,7 @@ export default function GrokChat({ user }: GrokChatProps) {
       const reader = new FileReader()
       reader.onloadend = () => {
         setSelectedImagePreview(reader.result as string)
-        setSelectedImageBase64(reader.result as string) // Store full base64 string
+        setSelectedImageBase64(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -215,21 +263,26 @@ export default function GrokChat({ user }: GrokChatProps) {
     setSelectedImagePreview(null)
     setSelectedImageBase64(null)
     if (fileInputRef.current) {
-      fileInputRef.current.value = "" // Clear the file input
+      fileInputRef.current.value = ""
     }
   }
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() && !selectedImageBase64) {
-      return // Don't send empty messages
+      return
+    }
+
+    // Проверяем, является ли это запросом на генерацию изображения
+    if (typeof input === "string" && isImageGenerationRequest(input)) {
+      setIsGeneratingImage(true)
     }
 
     const userMessage: Message = {
-      id: Date.now().toString(), // Temporary ID
+      id: Date.now().toString(),
       role: "user",
       content: [],
-    } as Message // Cast to Message to satisfy type, will populate content below
+    } as Message
 
     if (input.trim()) {
       ;(userMessage.content as TextPart[]).push({ type: "text", text: input.trim() })
@@ -238,7 +291,6 @@ export default function GrokChat({ user }: GrokChatProps) {
       ;(userMessage.content as ImagePart[]).push({ type: "image", image: selectedImageBase64 })
     }
 
-    // If content is an array with only one text part, simplify it to a string
     if (
       Array.isArray(userMessage.content) &&
       userMessage.content.length === 1 &&
@@ -247,9 +299,34 @@ export default function GrokChat({ user }: GrokChatProps) {
       userMessage.content = userMessage.content[0].text
     }
 
-    append(userMessage)
+    append(userMessage as Message)
     setInput("")
     clearSelectedImage()
+  }
+
+  // Функция для скачивания изображения
+  const downloadImage = async (imageUrl: string, filename = "grok-generated-image.png") => {
+    try {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(language === "ru" ? "Изображение скачано!" : "Image downloaded!")
+    } catch (error) {
+      toast.error(language === "ru" ? "Ошибка скачивания" : "Download failed")
+    }
+  }
+
+  // Функция для регенерации изображения
+  const regenerateImage = (originalPrompt: string) => {
+    const regenerateText = language === "ru" ? `Создай изображение ${originalPrompt}` : `Create image ${originalPrompt}`
+    setInput(regenerateText)
   }
 
   const renderMessageContent = (content: string | (TextPart | ImagePart)[]) => {
@@ -258,6 +335,55 @@ export default function GrokChat({ user }: GrokChatProps) {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
+            img: ({ src, alt }) => {
+              // Проверяем, является ли это сгенерированным изображением
+              const isGeneratedImage = alt?.includes("Сгенерированное изображение") || alt?.includes("Generated image")
+
+              return (
+                <div className="my-4">
+                  <div className="relative group rounded-lg overflow-hidden border border-gray-600">
+                    <img
+                      src={src || "/placeholder.svg"}
+                      alt={alt || "Generated image"}
+                      className="w-full h-auto max-w-full"
+                      style={{ maxHeight: "512px", objectFit: "contain" }}
+                    />
+
+                    {isGeneratedImage && (
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <Button
+                          onClick={() => downloadImage(src || "", "grok-generated-image.png")}
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 w-8 p-0 bg-black/70 text-white hover:bg-black/90"
+                          title={language === "ru" ? "Скачать изображение" : "Download image"}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            // Извлекаем оригинальный промпт из контекста сообщения
+                            const messageText = content as string
+                            const promptMatch = messageText.match(
+                              /\*\*(?:Использованный промпт|Used prompt):\*\* (.+)/i,
+                            )
+                            if (promptMatch) {
+                              regenerateImage(promptMatch[1])
+                            }
+                          }}
+                          size="sm"
+                          variant="secondary"
+                          className="h-8 w-8 p-0 bg-black/70 text-white hover:bg-black/90"
+                          title={language === "ru" ? "Создать заново" : "Regenerate"}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            },
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "")
 
@@ -348,6 +474,54 @@ export default function GrokChat({ user }: GrokChatProps) {
                   key={index}
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    img: ({ src, alt }) => {
+                      const isGeneratedImage =
+                        alt?.includes("Сгенерированное изображение") || alt?.includes("Generated image")
+
+                      return (
+                        <div className="my-4">
+                          <div className="relative group rounded-lg overflow-hidden border border-gray-600">
+                            <img
+                              src={src || "/placeholder.svg"}
+                              alt={alt || "Generated image"}
+                              className="w-full h-auto max-w-full"
+                              style={{ maxHeight: "512px", objectFit: "contain" }}
+                            />
+
+                            {isGeneratedImage && (
+                              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                <Button
+                                  onClick={() => downloadImage(src || "", "grok-generated-image.png")}
+                                  size="sm"
+                                  variant="secondary"
+                                  className="h-8 w-8 p-0 bg-black/70 text-white hover:bg-black/90"
+                                  title={language === "ru" ? "Скачать изображение" : "Download image"}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  onClick={() => {
+                                    const messageText = part.text
+                                    const promptMatch = messageText.match(
+                                      /\*\*(?:Использованный промпт|Used prompt):\*\* (.+)/i,
+                                    )
+                                    if (promptMatch) {
+                                      regenerateImage(promptMatch[1])
+                                    }
+                                  }}
+                                  size="sm"
+                                  variant="secondary"
+                                  className="h-8 w-8 p-0 bg-black/70 text-white hover:bg-black/90"
+                                  title={language === "ru" ? "Создать заново" : "Regenerate"}
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    },
                     code({ node, inline, className, children, ...props }) {
                       const match = /language-(\w+)/.exec(className || "")
 
@@ -507,8 +681,6 @@ export default function GrokChat({ user }: GrokChatProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-[60px] pb-[120px]">
-        {" "}
-        {/* Adjusted padding */}
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
@@ -526,12 +698,25 @@ export default function GrokChat({ user }: GrokChatProps) {
                   {t("helloUser", { name: displayName.split(" ")[0] })}
                 </h3>
                 <p className="text-gray-400">{t("howCanIHelp")}</p>
+
+                {/* Добавляем подсказки о генерации изображений */}
+                <div className="mt-8 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Palette className="h-5 w-5 text-purple-400" />
+                    <span className="text-sm font-medium text-gray-300">
+                      {language === "ru" ? "Генерация изображений" : "Image Generation"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {language === "ru"
+                      ? 'Попробуйте: "Создай изображение кота", "Нарисуй закат", "Покажи как выглядит робот"'
+                      : 'Try: "Create image of a cat", "Draw a sunset", "Show me what a robot looks like"'}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
             <div className="py-8 space-y-8">
-              {" "}
-              {/* Added back vertical padding for messages */}
               {messages.map((message) => (
                 <div key={message.id} className="group">
                   <div className="flex gap-4 mb-4">
@@ -591,7 +776,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                   )}
                 </div>
               ))}
-              {isLoading && (
+              {(isLoading || isGeneratingImage) && (
                 <div className="group">
                   <div className="flex gap-4 mb-4">
                     <Avatar className="h-8 w-8 flex-shrink-0">
@@ -627,7 +812,13 @@ export default function GrokChat({ user }: GrokChatProps) {
                             style={{ animationDelay: "0.2s" }}
                           ></div>
                         </div>
-                        <span className="text-xs">{t("generating")}</span>
+                        <span className="text-xs">
+                          {isGeneratingImage
+                            ? language === "ru"
+                              ? "Grok создает изображение..."
+                              : "Grok is creating image..."
+                            : t("generating")}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -664,8 +855,16 @@ export default function GrokChat({ user }: GrokChatProps) {
               <Input
                 value={input}
                 onChange={handleInputChange}
-                placeholder={isListening ? t("listening") : t("askSomething")}
-                disabled={isLoading || isListening}
+                placeholder={
+                  isListening
+                    ? t("listening")
+                    : isGeneratingImage
+                      ? language === "ru"
+                        ? "Создаю изображение..."
+                        : "Creating image..."
+                      : t("askSomething")
+                }
+                disabled={isLoading || isListening || isGeneratingImage}
                 className="flex-1 bg-transparent border-0 pl-4 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
 
@@ -674,7 +873,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading || isListening}
+                  disabled={isLoading || !SpeechRecognition || isGeneratingImage}
                   size="sm"
                   className="h-8 w-8 p-0 bg-transparent text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Upload Image"
@@ -685,14 +884,14 @@ export default function GrokChat({ user }: GrokChatProps) {
                 <Button
                   type="button"
                   onClick={toggleVoiceInput}
-                  disabled={isLoading || !SpeechRecognition}
+                  disabled={isLoading || !SpeechRecognition || isGeneratingImage}
                   size="sm"
                   className={`h-8 w-8 p-0 ${isListening ? "bg-red-600 animate-pulse" : "bg-transparent"} text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <Mic className="h-4 w-4" />
                 </Button>
 
-                {isLoading ? (
+                {isLoading || isGeneratingImage ? (
                   <Button
                     type="button"
                     onClick={stop}
