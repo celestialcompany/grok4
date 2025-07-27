@@ -3,6 +3,7 @@ export async function GET() {
 <html>
 <head>
   <title>Ошибка оплаты</title>
+  <meta charset="UTF-8">
   <style>
     body {font-family: Arial; background: linear-gradient(135deg, #fc466b, #3f5efb); margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center}
     .container {background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px}
