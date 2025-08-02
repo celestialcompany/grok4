@@ -166,7 +166,7 @@ Authorization: Bearer <firebase-id-token>
 
 ### GET /api/chats/{chatId}/messages
 
-Получить сообщения чата.
+Получить сообщ��ния чата.
 
 **Параметры:**
 - `chatId` - ID чата

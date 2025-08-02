@@ -66,7 +66,7 @@ export const translations = {
     howCanIHelp: "Чем могу помочь?",
     askSomething: "Спросите что-нибудь...",
     you: "Вы",
-    grok: "Grok",
+    grok: "Grok", // Keep for chat component
     share: "Поделиться",
     settings: "Настройки",
     signOut: "Выйти",
@@ -76,8 +76,6 @@ export const translations = {
     listening: "Слушаю...",
     voiceInputError: "Ошибка голосового ввода",
     browserNotSupported: "Браузер не поддерживает голосовой ввод",
-    // Removed regeneratingResponse: "Генерирую ответ заново...",
-    // Removed noPreviousMessage: "Нет предыдущего сообщения для повторной генерации.",
 
     // Messages
     copied: "Скопировано!",
@@ -99,38 +97,38 @@ export const translations = {
 
     // Main Page
     latestModel: "Последняя модель",
-    heroTitle: "Добро пожаловать в Grok 4: Ваш остроумный AI-компаньон",
+    heroTitle: "Добро пожаловать в StackWay AI: Ваш остроумный AI-компаньон", // Updated
     heroDescription:
-      "Ощутите будущее AI с Grok 4, разработанным для продвинутого рассуждения, аналитики в реальном времени и немного бунтарского остроумия.",
+      "Ощутите будущее AI с StackWay AI, разработанным для продвинутого рассуждения, аналитики в реальном времени и немного бунтарского остроумия.", // Updated
     startChatting: "Начать чат",
-    featuresTitle: "Раскройте мощь Grok 4",
+    featuresTitle: "Раскройте мощь StackWay AI", // Updated
     feature1Title: "Знания в реальном времени",
     feature1Description:
-      "Grok 4 имеет доступ к самой актуальной информации, предоставляя вам свежие данные и осведомленность о текущих событиях.",
+      "StackWay AI имеет доступ к самой актуальной информации, предоставляя вам свежие данные и осведомленность о текущих событиях.", // Updated
     feature2Title: "Продвинутое рассуждение",
     feature2Description:
-      "Решайте сложные задачи с улучшенными логическими рассуждениями и многошаговым анализом Grok 4.",
+      "Решайте сложные задачи с улучшенными логическими рассуждениями и многошаговым анализом StackWay AI.", // Updated
     feature3Title: "Режим прозрачного мышления",
     feature3Description:
-      "Узнайте, как Grok 4 приходит к своим выводам, с помощью подробных, пошаговых блоков рассуждений.",
+      "Узнайте, как StackWay AI приходит к своим выводам, с помощью подробных, пошаговых блоков рассуждений.", // Updated
     feature4Title: "Уникальная личность",
-    feature4Description: "Общайтесь с Grok 4, обладающим любопытным, остроумным и немного бунтарским характером.",
+    feature4Description: "Общайтесь с StackWay AI, обладающим любопытным, остроумным и немного бунтарским характером.", // Updated
     feature5Title: "Генерация кода",
     feature5Description:
-      "Grok 4 может помочь с генерацией кода, отладкой и пониманием сложных концепций программирования.",
+      "StackWay AI может помочь с генерацией кода, отладкой и пониманием сложных концепций программирования.", // Updated
     feature6Title: "Повышенная безопасность",
     feature6Description: "Создан с использованием надежных мер безопасности для защиты ваших данных и взаимодействий.",
-    ctaTitle: "Готовы пообщаться с Grok 4?",
-    ctaDescription: "Присоединяйтесь к беседе и исследуйте возможности новейшей модели AI от xAI.",
-    benchmarksTitle: "Результаты тестов Grok 4",
+    ctaTitle: "Готовы пообщаться со StackWay AI?", // Updated
+    ctaDescription: "Присоединяйтесь к беседе и исследуйте возможности новейшей модели AI от StackWay.", // Updated
+    benchmarksTitle: "Результаты тестов StackWay AI", // Updated
     vendingBenchTitle: "Vending-Bench: Экономическая эффективность",
     vendingBenchDescription:
-      "Сравнение моделей AI по показателям чистой стоимости и проданных единиц в симулированной экономической среде, демонстрирующее превосходство Grok 4.",
-    vendingBenchAlt: "График производительности Grok 4 на Vending-Bench",
+      "Сравнение моделей AI по показателям чистой стоимости и проданных единиц в симулированной экономической среде, демонстрирующее превосходство StackWay AI.", // Updated
+    vendingBenchAlt: "График производительности StackWay AI на Vending-Bench", // Updated
     humanityExamTitle: "Последний экзамен человечества: Общие знания",
     humanityExamDescription:
-      "Результаты Grok 4 на комплексном экзамене, показывающие его выдающиеся способности в общих знаниях и рассуждениях по сравнению с другими моделями.",
-    humanityExamAlt: "График производительности Grok 4 на экзамене 'Последний экзамен человечества'",
+      "Результаты StackWay AI на комплексном экзамене, показывающие его выдающиеся способности в общих знаниях и рассуждениях по сравнению с другими моделями.", // Updated
+    humanityExamAlt: "График производительности StackWay AI на экзамене 'Последний экзамен человечества'", // Updated
     termsOfService: "Условия использования",
     privacyPolicy: "Политика конфиденциальности",
     backToHome: "← На главную",
@@ -171,7 +169,7 @@ export const translations = {
     privacySection5Content:
       "Вы имеете право на доступ, исправление или удаление вашей личной информации. Вы также можете запросить ограничение обработки ваших данных или возразить против нее. Пожалуйста, свяжитесь с нами, если у вас есть какие-либо вопросы о вашей конфиденциальности или вы хотите воспользоваться своими правами.",
     privacyConclusion: "Используя наш сервис, вы соглашаетесь с этой Политикой конфиденциальности.",
-    freeChatDisclaimer: "Общение с Grok 4 абсолютно бесплатно!",
+    freeChatDisclaimer: "Общение со StackWay AI абсолютно бесплатно!", // Updated
     feedbackLiked: "Отзыв отправлен: Понравилось!",
     feedbackDisliked: "Отзыв отправлен: Не понравилось.",
     // New terms and privacy content
@@ -192,6 +190,19 @@ export const translations = {
     privacySection8Title: "Свяжитесь с нами",
     privacySection8Content:
       "Если у вас есть какие-либо вопросы об этой Политике конфиденциальности, пожалуйста, свяжитесь с нами по адресу support@stackway.tech.",
+    poweredByStackWayAI: "Работает на StackWay AI",
+    news: "Новости", // New
+    newsPageTitle: "Последние новости StackWay", // New
+    newsArticleTitle: "Представляем StackWay AI: Ваша новая эра искусственного интеллекта!", // New
+    newsArticleDate: "3 августа 2025 г.", // New
+    newsArticleContent1:
+      "Мы рады объявить о запуске нашей собственной передовой модели искусственного интеллекта — StackWay AI! Это значительный шаг вперед в нашей миссии по предоставлению мощных и доступных AI-решений для всех.", // New
+    newsArticleContent2:
+      "StackWay AI разработан с нуля, чтобы быть невероятно универсальным и мощным. Он способен не только вести осмысленные диалоги, но и создавать файлы по вашим запросам, что открывает совершенно новые возможности для автоматизации и творчества.", // New
+    newsArticleContent3:
+      "Мы верим в свободу информации и самовыражения. Поэтому StackWay AI имеет минимальную цензуру, позволяя вам исследовать широкий спектр тем и получать ответы без излишних ограничений, сохраняя при этом этические нормы.", // New
+    newsArticleContent4:
+      "И самое главное: StackWay AI полностью бесплатен для всех пользователей! Наша цель — сделать передовые технологии искусственного интеллекта доступными для каждого, без барьеров и скрытых платежей. Начните использовать StackWay AI уже сегодня и откройте для себя безграничные возможности!", // New
   },
   en: {
     // Auth
@@ -260,7 +271,7 @@ export const translations = {
     howCanIHelp: "How can I help you?",
     askSomething: "Ask something...",
     you: "You",
-    grok: "Grok",
+    grok: "Grok", // Keep for chat component
     share: "Share",
     settings: "Settings",
     signOut: "Sign Out",
@@ -270,8 +281,6 @@ export const translations = {
     listening: "Listening...",
     voiceInputError: "Voice input error",
     browserNotSupported: "Browser does not support voice input",
-    // Removed regeneratingResponse: "Regenerating response...",
-    // Removed noPreviousMessage: "No previous message to regenerate.",
 
     // Messages
     copied: "Copied!",
@@ -293,37 +302,38 @@ export const translations = {
 
     // Main Page
     latestModel: "Latest Model",
-    heroTitle: "Welcome to Grok 4: Your Witty AI Companion",
+    heroTitle: "Welcome to StackWay AI: Your Witty AI Companion", // Updated
     heroDescription:
-      "Experience the future of AI with Grok 4, designed for advanced reasoning, real-time insights, and a touch of rebellious wit.",
+      "Experience the future of AI with StackWay AI, designed for advanced reasoning, real-time insights, and a touch of rebellious wit.", // Updated
     startChatting: "Start Chatting",
-    featuresTitle: "Unleash Grok 4's Power",
+    featuresTitle: "Unleash StackWay AI's Power", // Updated
     feature1Title: "Real-time Knowledge",
     feature1Description:
-      "Grok 4 has access to the latest information, providing you with up-to-date insights and current event awareness.",
+      "StackWay AI has access to the latest information, providing you with up-to-date insights and current event awareness.", // Updated
     feature2Title: "Advanced Reasoning",
     feature2Description:
-      "Tackle complex problems with Grok 4's enhanced logical reasoning and multi-step analysis capabilities.",
+      "Tackle complex problems with StackWay AI's enhanced logical reasoning and multi-step analysis capabilities.", // Updated
     feature3Title: "Transparent Thinking Mode",
-    feature3Description: "See how Grok 4 arrives at its conclusions with detailed, step-by-step reasoning blocks.",
+    feature3Description: "See how StackWay AI arrives at its conclusions with detailed, step-by-step reasoning blocks.", // Updated
     feature4Title: "Unique Personality",
-    feature4Description: "Engage in conversations with Grok 4's curious, witty, and slightly rebellious character.",
+    feature4Description:
+      "Engage in conversations with StackWay AI's curious, witty, and slightly rebellious character.", // Updated
     feature5Title: "Code Generation",
     feature5Description:
-      "Grok 4 can assist with code generation, debugging, and understanding complex programming concepts.",
+      "StackWay AI can assist with code generation, debugging, and understanding complex programming concepts.", // Updated
     feature6Title: "Enhanced Security",
     feature6Description: "Built with robust security measures to protect your data and interactions.",
-    ctaTitle: "Ready to Chat with Grok 4?",
-    ctaDescription: "Join the conversation and explore the capabilities of the latest AI model from xAI.",
-    benchmarksTitle: "Grok 4 Test Results",
+    ctaTitle: "Ready to Chat with StackWay AI?", // Updated
+    ctaDescription: "Join the conversation and explore the capabilities of the latest AI model from StackWay.", // Updated
+    benchmarksTitle: "StackWay AI Test Results", // Updated
     vendingBenchTitle: "Vending-Bench: Economic Efficiency",
     vendingBenchDescription:
-      "A comparison of AI models on simulated economic performance metrics, showcasing Grok 4's superior capabilities in net worth and units sold.",
-    vendingBenchAlt: "Grok 4 performance chart on Vending-Bench",
+      "A comparison of AI models on simulated economic performance metrics, showcasing StackWay AI's superior capabilities in net worth and units sold.", // Updated
+    vendingBenchAlt: "StackWay AI performance chart on Vending-Bench", // Updated
     humanityExamTitle: "Humanity's Last Exam: General Knowledge",
     humanityExamDescription:
-      "Grok 4's results on a comprehensive general knowledge and reasoning exam, demonstrating its outstanding performance against other leading AI models.",
-    humanityExamAlt: "Grok 4 performance chart on Humanity's Last Exam",
+      "StackWay AI's results on a comprehensive general knowledge and reasoning exam, demonstrating its outstanding performance against other leading AI models.", // Updated
+    humanityExamAlt: "StackWay AI performance chart on Humanity's Last Exam", // Updated
     termsOfService: "Terms of Service",
     privacyPolicy: "Privacy Policy",
     backToHome: "← Back to Home",
@@ -363,7 +373,7 @@ export const translations = {
     privacySection5Content:
       "You have the right to access, correct, or delete your personal information. You may also request to restrict or object to the processing of your data. Please contact us if you have any questions about your privacy or wish to exercise your rights.",
     privacyConclusion: "By using our service, you agree to this Privacy Policy.",
-    freeChatDisclaimer: "Chatting with Grok 4 is completely free!",
+    freeChatDisclaimer: "Chatting with StackWay AI is completely free!", // Updated
     feedbackLiked: "Feedback sent: Liked!",
     feedbackDisliked: "Feedback sent: Disliked.",
     // New terms and privacy content
@@ -384,6 +394,19 @@ export const translations = {
     privacySection8Title: "Contact Us",
     privacySection8Content:
       "If you have any questions about this Privacy Policy, please contact us at support@stackway.tech.",
+    poweredByStackWayAI: "Powered by StackWay AI",
+    news: "News", // New
+    newsPageTitle: "Latest StackWay News", // New
+    newsArticleTitle: "Introducing StackWay AI: Your New Era of Artificial Intelligence!", // New
+    newsArticleDate: "August 3, 2025", // New
+    newsArticleContent1:
+      "We are thrilled to announce the launch of our very own cutting-edge artificial intelligence model — StackWay AI! This marks a significant leap forward in our mission to provide powerful and accessible AI solutions for everyone.", // New
+    newsArticleContent2:
+      "StackWay AI is designed from the ground up to be incredibly versatile and powerful. It's not only capable of engaging in meaningful dialogues but can also create files based on your requests, opening up entirely new possibilities for automation and creativity.", // New
+    newsArticleContent3:
+      "We believe in the freedom of information and expression. That's why StackWay AI features minimal censorship, allowing you to explore a wide range of topics and receive answers without excessive restrictions, while still adhering to ethical guidelines.", // New
+    newsArticleContent4:
+      "And best of all: StackWay AI is completely free for all users! Our goal is to make advanced AI technology accessible to everyone, without barriers or hidden fees. Start using StackWay AI today and unlock limitless possibilities!", // New
   },
 } as const
 

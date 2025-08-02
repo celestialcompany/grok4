@@ -12,7 +12,7 @@ const SpeechRecognition =
     : undefined
 type SpeechRecognitionType = InstanceType<typeof SpeechRecognition> | null
 
-import { useChat } from "ai/react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -43,67 +43,64 @@ import {
   X,
   ImageIcon,
 } from "lucide-react"
-import { useRef, useEffect, useState, useCallback } from "react"
 import { toast } from "sonner"
 import { auth } from "@/lib/firebase"
 import { signOut, type User } from "firebase/auth"
 import { useLanguage } from "@/contexts/language-context"
 import LanguageSwitcher from "@/components/language-switcher"
-import type { Message, ImagePart, TextPart } from "ai" // Import types from ai
 
 interface GrokChatProps {
   user: User
+}
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string | MessagePart[]
+}
+
+interface MessagePart {
+  type: "text" | "image"
+  text?: string
+  image?: string
 }
 
 export default function GrokChat({ user }: GrokChatProps) {
   const { t } = useLanguage()
   const { language } = useLanguage()
   const [isListening, setIsListening] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState("")
   const recognitionRef = useRef<SpeechRecognitionType>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
   const [selectedImageBase64, setSelectedImageBase64] = useState<string | null>(null)
 
-  const [initialChatMessages] = useState<Message[]>(() => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
+  // Load messages from localStorage on mount
+  useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const savedMessages = localStorage.getItem("chat_history")
-        return savedMessages ? JSON.parse(savedMessages) : []
+        if (savedMessages) {
+          setMessages(JSON.parse(savedMessages))
+        }
       } catch (error) {
         console.error("Failed to parse chat history from localStorage:", error)
-        return []
       }
     }
-    return []
-  })
+  }, [])
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setInput, append } = useChat({
-    initialMessages: initialChatMessages, // Pass initial messages here
-    body: {
-      language: language,
-    },
-    onFinish: () => {
-      if (isListening && recognitionRef.current) {
-        recognitionRef.current.stop()
-        setIsListening(false)
-      }
-    },
-    onError: () => {
-      if (isListening && recognitionRef.current) {
-        recognitionRef.current.stop()
-        setIsListening(false)
-      }
-    },
-    // Save messages to localStorage whenever they change
-    onMessagesChange: (currentMessages) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("chat_history", JSON.stringify(currentMessages))
-      }
-    },
-  })
-
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== "undefined" && messages.length > 0) {
+      localStorage.setItem("chat_history", JSON.stringify(messages))
+    }
+  }, [messages])
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -148,7 +145,7 @@ export default function GrokChat({ user }: GrokChatProps) {
 
       recognitionRef.current = recognition
     }
-  }, [language, input, setInput, isLoading, t])
+  }, [language, input, t])
 
   const toggleVoiceInput = useCallback(() => {
     if (!SpeechRecognition) {
@@ -205,7 +202,7 @@ export default function GrokChat({ user }: GrokChatProps) {
       const reader = new FileReader()
       reader.onloadend = () => {
         setSelectedImagePreview(reader.result as string)
-        setSelectedImageBase64(reader.result as string) // Store full base64 string
+        setSelectedImageBase64(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -215,27 +212,35 @@ export default function GrokChat({ user }: GrokChatProps) {
     setSelectedImagePreview(null)
     setSelectedImageBase64(null)
     if (fileInputRef.current) {
-      fileInputRef.current.value = "" // Clear the file input
+      fileInputRef.current.value = ""
     }
   }
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const stopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsLoading(false)
+  }
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() && !selectedImageBase64) {
-      return // Don't send empty messages
+      return
     }
 
     const userMessage: Message = {
-      id: Date.now().toString(), // Temporary ID
+      id: Date.now().toString(),
       role: "user",
       content: [],
-    } as Message // Cast to Message to satisfy type, will populate content below
+    }
 
     if (input.trim()) {
-      ;(userMessage.content as TextPart[]).push({ type: "text", text: input.trim() })
+      ;(userMessage.content as MessagePart[]).push({ type: "text", text: input.trim() })
     }
     if (selectedImageBase64) {
-      ;(userMessage.content as ImagePart[]).push({ type: "image", image: selectedImageBase64 })
+      ;(userMessage.content as MessagePart[]).push({ type: "image", image: selectedImageBase64 })
     }
 
     // If content is an array with only one text part, simplify it to a string
@@ -244,15 +249,93 @@ export default function GrokChat({ user }: GrokChatProps) {
       userMessage.content.length === 1 &&
       userMessage.content[0].type === "text"
     ) {
-      userMessage.content = userMessage.content[0].text
+      userMessage.content = userMessage.content[0].text!
     }
 
-    append(userMessage)
+    setMessages((prev) => [...prev, userMessage])
     setInput("")
     clearSelectedImage()
+    setIsLoading(true)
+
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController()
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          language: language,
+        }),
+        signal: abortControllerRef.current.signal,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get response")
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error("No response body")
+      }
+
+      let assistantMessage = ""
+      const assistantMessageObj: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "",
+      }
+
+      setMessages((prev) => [...prev, assistantMessageObj])
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = new TextDecoder().decode(value)
+        const lines = chunk.split("\n")
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6)
+            if (data === "[DONE]") {
+              break
+            }
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.choices?.[0]?.delta?.content) {
+                assistantMessage += parsed.choices[0].delta.content
+                setMessages((prev) =>
+                  prev.map((msg) => (msg.id === assistantMessageObj.id ? { ...msg, content: assistantMessage } : msg)),
+                )
+              }
+            } catch (e) {
+              // Ignore parsing errors for individual chunks
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.log("Request was aborted")
+        // Remove the incomplete assistant message
+        setMessages((prev) => prev.filter((msg) => msg.role !== "assistant" || msg.content !== ""))
+      } else {
+        console.error("Error:", error)
+        toast.error("Failed to get response")
+        // Remove the user message if there was an error
+        setMessages((prev) => prev.slice(0, -1))
+      }
+    } finally {
+      setIsLoading(false)
+      abortControllerRef.current = null
+    }
   }
 
-  const renderMessageContent = (content: string | (TextPart | ImagePart)[]) => {
+  const renderMessageContent = (content: string | MessagePart[]) => {
     if (typeof content === "string") {
       return (
         <ReactMarkdown
@@ -428,7 +511,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                     em: ({ children }) => <em className="italic text-gray-200">{children}</em>,
                   }}
                 >
-                  {part.text}
+                  {part.text || ""}
                 </ReactMarkdown>
               )
             } else if (part.type === "image") {
@@ -507,8 +590,6 @@ export default function GrokChat({ user }: GrokChatProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full pt-[60px] pb-[120px]">
-        {" "}
-        {/* Adjusted padding */}
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
@@ -530,8 +611,6 @@ export default function GrokChat({ user }: GrokChatProps) {
             </div>
           ) : (
             <div className="py-8 space-y-8">
-              {" "}
-              {/* Added back vertical padding for messages */}
               {messages.map((message) => (
                 <div key={message.id} className="group">
                   <div className="flex gap-4 mb-4">
@@ -606,7 +685,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                       <div className="flex items-center justify-between">
                         <div className="font-medium text-sm text-gray-300">{t("grok")} 4</div>
                         <Button
-                          onClick={stop}
+                          onClick={stopGeneration}
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700"
@@ -663,7 +742,7 @@ export default function GrokChat({ user }: GrokChatProps) {
             <div className="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-500">
               <Input
                 value={input}
-                onChange={handleInputChange}
+                onChange={(e) => setInput(e.target.value)}
                 placeholder={isListening ? t("listening") : t("askSomething")}
                 disabled={isLoading || isListening}
                 className="flex-1 bg-transparent border-0 pl-4 pr-20 py-4 text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -695,7 +774,7 @@ export default function GrokChat({ user }: GrokChatProps) {
                 {isLoading ? (
                   <Button
                     type="button"
-                    onClick={stop}
+                    onClick={stopGeneration}
                     size="sm"
                     className="h-8 w-8 p-0 bg-red-600 text-white hover:bg-red-700"
                     title={t("stopGeneration")}
@@ -717,7 +796,17 @@ export default function GrokChat({ user }: GrokChatProps) {
           </form>
 
           <div className="flex items-center justify-end mt-3">
-            <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4</p>
+            <p className="text-xs text-gray-400">
+              {t("disclaimer")} • {t("poweredByStackWayAI")}{" "}
+              <a
+                href="https://ai.stackway.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                ai.stackway.tech
+              </a>
+            </p>
           </div>
         </div>
       </div>
