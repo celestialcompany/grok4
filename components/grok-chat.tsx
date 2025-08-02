@@ -796,17 +796,7 @@ export default function GrokChat({ user }: GrokChatProps) {
           </form>
 
           <div className="flex items-center justify-end mt-3">
-            <p className="text-xs text-gray-400">
-              {t("disclaimer")} • {t("poweredByStackWayAI")}{" "}
-              <a
-                href="https://ai.stackway.tech"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:underline"
-              >
-                ai.stackway.tech
-              </a>
-            </p>
+            <p className="text-xs text-gray-400">{t("disclaimer")} • Powered by Grok 4</p>
           </div>
         </div>
       </div>

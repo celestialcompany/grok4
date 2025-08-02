@@ -27,14 +27,6 @@ export default function MainPage() {
             </h1>
           </div>
           <nav className="flex items-center gap-4">
-            <Link href="/news" passHref>
-              <Button
-                variant="ghost"
-                className="text-gray-300 hover:text-white hover:bg-gray-800 transition-colors duration-200"
-              >
-                {t("news")}
-              </Button>
-            </Link>
             <LanguageSwitcher />
             <Link href="/chat" passHref>
               <Button
@@ -59,7 +51,7 @@ export default function MainPage() {
         ></div>
         <div className="relative z-10 max-w-5xl mx-auto px-6">
           <Badge className="mb-6 bg-gradient-to-r from-blue-700 to-purple-700 text-white text-sm px-3 py-1 rounded-full shadow-md animate-fade-in-down [animation-delay:0.4s]">
-            StackWay AI • {t("latestModel")}
+            {t("grok")} 4-0709 • {t("latestModel")}
           </Badge>
           <h2 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300 animate-slide-in-up [animation-delay:0.6s]">
             {t("heroTitle")}
@@ -76,21 +68,6 @@ export default function MainPage() {
             </Button>
           </Link>
           <p className="text-sm text-gray-500 mt-4 animate-fade-in [animation-delay:1.2s]">{t("freeChatDisclaimer")}</p>
-
-          {/* Prominent "Powered by StackWay AI" */}
-          <div className="mt-12 flex flex-col items-center animate-fade-in [animation-delay:1.4s]">
-            <p className="text-xl md:text-2xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-teal-400 mb-2">
-              {t("poweredByStackWayAI")}
-            </p>
-            <a
-              href="https://ai.stackway.tech"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-lg text-blue-400 hover:underline font-medium"
-            >
-              ai.stackway.tech
-            </a>
-          </div>
         </div>
       </section>
 
@@ -240,7 +217,7 @@ export default function MainPage() {
       {/* Footer */}
       <footer className="w-full py-6 bg-[#1A1A1A] border-t border-[#2A2A2A] text-center text-gray-400 text-xs animate-fade-in [animation-delay:0.2s]">
         <p>
-          &copy; {new Date().getFullYear()} StackWay. {t("allRightsReserved")}
+          &copy; {new Date().getFullYear()} StackWay. {t("allRightsReserved")} • Powered by xAI
         </p>
         <div className="flex justify-center gap-4 mt-2">
           <Link href="/terms" passHref>
